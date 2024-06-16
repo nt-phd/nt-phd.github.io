@@ -169,7 +169,7 @@
             const esv = parseFloat(document.getElementById('esv').value);
             if (!isNaN(edv) && !isNaN(esv) && edv !== 0) {
                 const ef = (1 - esv / edv) * 100;
-                document.getElementById('ef').value = ef.toFixed(2);
+                document.getElementById('ef').value = ef.toFixed(0);
             }
         }
 
@@ -178,7 +178,7 @@
             const ef = parseFloat(document.getElementById('ef').value);
             if (!isNaN(edv) && !isNaN(ef)) {
                 const esv = edv * (1 - ef / 100);
-                document.getElementById('esv').value = esv.toFixed(2);
+                document.getElementById('esv').value = esv.toFixed(1;
             }
         }
 
@@ -187,7 +187,7 @@
             const edv = parseFloat(document.getElementById('edv').value);
             if (!isNaN(ef) && !isNaN(edv) && ef !== 0) {
                 const esv = edv * (1 - ef / 100);
-                document.getElementById('esv').value = esv.toFixed(0);
+                document.getElementById('esv').value = esv.toFixed(1));
             }
         }
 
