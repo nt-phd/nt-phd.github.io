@@ -110,37 +110,42 @@
 
 
                 if (question.activities) {
-                    let activityTable = document.createElement("table");
-                    activityTable.classList.add("table", "table-striped");
+                    let activityTable = document.createElement("div");
+                    activityTable.classList.add("table-responsive");
+
+                    let table = document.createElement("table");
+                    table.classList.add("table", "table-hover");
 
                     let thead = document.createElement("thead");
-                    let headers = `<tr><th scope="col">Attività</th>`;
+                    let headers = `<thead><tr><th scope="col" style="font-weight: normal;">Attività</th>`;
 
                     question.options.forEach(option => {
-                        headers += `<th scope="col" class="text-center">${option}</th>`;
+                        headers += `<th scope="col" class="text-center" style="font-weight: normal;">${option}</th>`;
                     });
-                    headers += `</tr>`;
+                    headers += `</tr></thead>`;
 
                     thead.innerHTML = headers;
-                    activityTable.appendChild(thead);
+                    table.appendChild(thead);
 
                     let tbody = document.createElement("tbody");
 
                     question.activities.forEach((activity, actIndex) => {
-                        let row = `<tr><td>${activity}</td>`;
+                        let row = `<tr><th scope="row">${activity}</th>`;
                         for (let i = 1; i <= question.options.length; i++) {
                             let inputId = `q${index + 1}_${actIndex + 1}_${i}`;
-                            row += `<td class="text-center" style="cursor: pointer;" onclick="document.getElementById('${inputId}').checked = true;">
-                        <input class="form-check-input" type="radio" id="${inputId}" name="q${index + 1}_${actIndex + 1}" value="${i}">
-                    </td>`;
+                            row += `<td class="text-center align-middle" style="cursor: pointer;" onclick="document.getElementById('${inputId}').checked = true;">
+                <input class="form-check-input" type="radio" id="${inputId}" name="q${index + 1}_${actIndex + 1}" value="${i}">
+            </td>`;
                         }
                         row += `</tr>`;
                         tbody.innerHTML += row;
                     });
 
-                    activityTable.appendChild(tbody);
+                    table.appendChild(tbody);
+                    activityTable.appendChild(table);
                     questionDiv.appendChild(activityTable);
                 }
+
 
 
 
@@ -288,6 +293,7 @@
             });
 
         });
+
     </script>
 </head>
 
@@ -304,17 +310,16 @@
         </form>
     </div>
     <div class="container">
-        <h4>Riferimenti:</h2>
-            <p>Green, C., Porter, C., Bresnahan, D., & Spertus, J. (2000). <i>Development and evaluation of the Kansas
-                    City Cardiomyopathy Questionnaire: a new health status measure for heart failure.</i> Journal of the
-                American College of Cardiology, 35 5, 1245-55 . https://doi.org/10.1016/S0735-1097(00)00531-3.</p>
-            <p>Miani, D., Rozbowsky, P., Gregori, D., Pilotto, L., Albanese, M., Fresco, C., & Fioretti, P. (2003).
-                <i>The Kansas City Cardiomyopathy Questionnaire: Italian translation and validation.</i> Italian heart
-                journal : official journal of the Italian Federation of Cardiology, 4 9, 620-6 .
-            </p>
-            <p>Tutti i diritti riservati ai rispettivi autori.</p>
-
+        <h4>Riferimenti:</h4>
+        <p>Green CP, Porter CB, Bresnahan DR, Spertus JA. Development and evaluation of the Kansas City Cardiomyopathy
+            Questionnaire: a new health status measure for heart failure. J Am Coll Cardiol. 2000 Apr;35(5):1245-55.
+            doi: 10.1016/s0735-1097(00)00531-3. PMID: 10758967.</p>
+        <p>Miani D, Rozbowsky P, Gregori D, Pilotto L, Albanese MC, Fresco C, Fioretti PM. The Kansas City
+            Cardiomyopathy Questionnaire: Italian translation and validation. Ital Heart J. 2003 Sep;4(9):620-6. PMID:
+            14635380.</p>
+        <p>Tutti i diritti riservati ai rispettivi autori.</p>
     </div>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
