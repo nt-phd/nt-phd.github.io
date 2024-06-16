@@ -187,7 +187,15 @@
             const edv = parseFloat(document.getElementById('edv').value);
             if (!isNaN(ef) && !isNaN(edv) && ef !== 0) {
                 const esv = edv * (1 - ef / 100);
-                document.getElementById('esv').value = esv.toFixed(2);
+                document.getElementById('esv').value = esv.toFixed(0);
+            }
+        }
+
+        function calculateDCCT() {
+            const ifcc = parseFloat(document.getElementById('ifcc').value);
+            if (!isNaN(ifcc)) {
+                const dcct = ifcc / 10.929 + 2.15;
+                document.getElementById('dcct').value = dcct.toFixed(1);
             }
         }
     </script>
@@ -196,8 +204,11 @@
 <body>
     <div class="container">
         <h1 class="my-4">REDCap Toolkit</h1>
-        <h2 class="my-4">Echo</h2>
+        
+        <h4 class="my-4">Echo</h4>
+
         <form>
+            
             <div class="form-row">
                 <div class="col-md-6 form-group">
                     <label for="height">Altezza (cm)</label>
@@ -224,8 +235,11 @@
                         placeholder="Inserisci valore da deindicizzare">
                 </div>
             </div>
-            <h2 class="my-4">Therapy</h2>
+
+            <h4 class="my-4">Therapy</h4>
+            
             <div class="form-row">
+                
                 <div class="col-md-4 form-group">
                     <label for="activeIngredient">Principio Attivo</label>
                     <input list="activeIngredients" class="form-control" id="activeIngredient"
@@ -245,9 +259,10 @@
                 </div>
             </div>
 
-            <h2 class="my-4">LVEF</h2>
+            <h4 class="my-4">FE</h4>
 
             <div class="form-row">
+                
                 <div class="col-md-4 form-group">
                     <label for="edv">EDV (mL)</label>
                     <input type="number" class="form-control mb-2" id="edv" placeholder="Volume telediastolico" oninput="calculateESV()">
@@ -258,10 +273,24 @@
                 </div>
                 <div class="col-md-4 form-group">
                     <label for="ef">EF (%)</label>
-                    <input type="number" class="form-control mb-2" id="ef" placeholder="Frazione d'eiezione"
-                        oninput="calculateESVFromEF()">
+                    <input type="number" class="form-control mb-2" id="ef" placeholder="Frazione d'eiezione" oninput="calculateESVFromEF()">
                 </div>
             </div>
+
+            <h4 class="my-4">Conversione HbA1c</h4>
+
+            <div class="form-row">
+               
+                <div class="col-md-4 form-group">
+                    <label for="ifcc">IFCC-HbA1c (mmol/mol)</label>
+                    <input type="number" class="form-control mb-2" id="ifcc" placeholder="HbA1c in mmol/mol" oninput="calculateDCCT()">
+                </div>
+                <div class="col-md-4 form-group">
+                    <label for="dcct">DCCT-HbA1c (%)</label>
+                    <input type="number" class="form-control mb-2" id="dcct" placeholder="Glicata in percentuale" readonly>
+                </div>
+            </div>
+
         </form>
 
         <script>
