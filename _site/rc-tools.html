@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RedCap Tools</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function calculateBSA() {
+            var height = parseFloat(document.getElementById('height').value) || 0;
+            var weight = parseFloat(document.getElementById('weight').value) || 0;
+            if (height > 0 && weight > 0) {
+                var bsa = Math.sqrt((weight * height) / 3600).toFixed(2);
+                document.getElementById('bsa').value = bsa;
+            }
+        }
+
+        function manualBSAUpdate() {
+            document.getElementById('height').value = '';
+            document.getElementById('weight').value = '';
+            updateFromBSA();
+        }
+
+        function updateFromBSA() {
+            var indexed = parseFloat(document.getElementById('indexed').value) || 0;
+            var bsa = parseFloat(document.getElementById('bsa').value) || 0;
+            if (bsa > 0 && indexed > 0) {
+                var deindexed = (indexed * bsa).toFixed(2);
+                document.getElementById('deindexed').value = deindexed;
+            }
+        }
+
+        function updateFromDeindexed() {
+            var deindexed = parseFloat(document.getElementById('deindexed').value) || 0;
+            var bsa = parseFloat(document.getElementById('bsa').value) || 0;
+            if (bsa > 0 && deindexed > 0) {
+                var indexed = (deindexed / bsa).toFixed(2);
+                document.getElementById('indexed').value = indexed;
+            }
+        }
+
+
+        const data = {
+    "Captopril": ["Heart Failure Therapy", "ACE Inhibitor"],
+    "Enalapril": ["Heart Failure Therapy", "ACE Inhibitor"],
+    "Fosinopril": ["Heart Failure Therapy", "ACE Inhibitor"],
+    "Lisinopril": ["Heart Failure Therapy", "ACE Inhibitor"],
+    "Moexipril": ["Heart Failure Therapy", "ACE Inhibitor"],
+    "Perindopril": ["Heart Failure Therapy", "ACE Inhibitor"],
+    "Quinapril": ["Heart Failure Therapy", "ACE Inhibitor"],
+    "Ramipril": ["Heart Failure Therapy", "ACE Inhibitor"],
+    "Trandolapril": ["Heart Failure Therapy", "ACE Inhibitor"],
+    "Candesartan": ["Heart Failure Therapy", "Angiotensin Receptor Blockers"],
+    "Irbesartan": ["Heart Failure Therapy", "Angiotensin Receptor Blockers"],
+    "Losartan": ["Heart Failure Therapy", "Angiotensin Receptor Blockers"],
+    "Olmesartan": ["Heart Failure Therapy", "Angiotensin Receptor Blockers"],
+    "Telmisartan": ["Heart Failure Therapy", "Angiotensin Receptor Blockers"],
+    "Valsartan": ["Heart Failure Therapy", "Angiotensin Receptor Blockers"],
+    "Atenolol": ["Heart Failure Therapy", "Beta Blockers"],
+    "Bisoprolol": ["Heart Failure Therapy", "Beta Blockers"],
+    "Carvedilol": ["Heart Failure Therapy", "Beta Blockers"],
+    "Metoprolol": ["Heart Failure Therapy", "Beta Blockers"],
+    "Nadolol": ["Heart Failure Therapy", "Beta Blockers"],
+    "Nebivolol": ["Heart Failure Therapy", "Beta Blockers"],
+    "Propranolol": ["Heart Failure Therapy", "Beta Blockers"],
+    "Canrenone": ["Heart Failure Therapy", "Mineralcorticoid Receptor Antagonists"],
+    "Eprelenone": ["Heart Failure Therapy", "Mineralcorticoid Receptor Antagonists"],
+    "Spironolactone": ["Heart Failure Therapy", "Mineralcorticoid Receptor Antagonists"],
+    "Furosemide": ["Heart Failure Therapy", "Loop Diuretics"],
+    "Torasemide": ["Heart Failure Therapy", "Loop Diuretics"],
+    "Ethacrynic acid": ["Heart Failure Therapy", "Loop Diuretics"],
+    "Hydrochlorothiazide": ["Heart Failure Therapy", "Thiazide Diuretics"],
+    "Indapamide": ["Heart Failure Therapy", "Thiazide Diuretics"],
+    "Metolazone": ["Heart Failure Therapy", "Thiazide Diuretics"],
+    "Sacubitril/Varsartan": ["Heart Failure Therapy", "Angiotensin Receptor Neprilysin Inhibitors"],
+    "Canagliflozin": ["Heart Failure Therapy", "SGLT2 Inhibitor"],
+    "Dapagliflozin": ["Heart Failure Therapy", "SGLT2 Inhibitor"],
+    "Empagliflozin": ["Heart Failure Therapy", "SGLT2 Inhibitor"],
+    "Ivabradine": ["Heart Failure Therapy", "Other Heart Failure Therapy"],
+    "Digoxin": ["Heart Failure Therapy", "Other Heart Failure Therapy"],
+    "Vericiguat": ["Heart Failure Therapy", "Other Heart Failure Therapy"],
+    "Hydralazine": ["Heart Failure Therapy", "Other Heart Failure Therapy"],
+    "Tafamidis": ["Heart Failure Therapy", "Other Heart Failure Therapy"],
+    "Amplodipine": ["Anti-Hypertensive Therapy", "Dihydropyridine Calcium Channel Blockers"],
+    "Barnidipine": ["Anti-Hypertensive Therapy", "Dihydropyridine Calcium Channel Blockers"],
+    "Felodipine": ["Anti-Hypertensive Therapy", "Dihydropyridine Calcium Channel Blockers"],
+    "Lacidipine": ["Anti-Hypertensive Therapy", "Dihydropyridine Calcium Channel Blockers"],
+    "Lercanidipine": ["Anti-Hypertensive Therapy", "Dihydropyridine Calcium Channel Blockers"],
+    "Manidipine": ["Anti-Hypertensive Therapy", "Dihydropyridine Calcium Channel Blockers"],
+    "Nifedipine": ["Anti-Hypertensive Therapy", "Dihydropyridine Calcium Channel Blockers"],
+    "Alfa Blocker": ["Anti-Hypertensive Therapy", "Other Anti-Hypertensive Therapy"],
+    "Clonidine": ["Anti-Hypertensive Therapy", "Other Anti-Hypertensive Therapy"],
+    "Nitrate": ["Anti-Hypertensive Therapy", "Other Anti-Hypertensive Therapy"],
+    "Flecainide": ["Anti-Arrhythmic Therapy", "Anti-Arrhythmics - Class 1C"],
+    "Propafenone": ["Anti-Arrhythmic Therapy", "Anti-Arrhythmics - Class 1C"],
+    "Amiodarone": ["Anti-Arrhythmic Therapy", "Anti-Arrhythmics - Class 4"],
+    "Dronedarone": ["Anti-Arrhythmic Therapy", "Anti-Arrhythmics - Class 5"],
+    "Sotalol": ["Anti-Arrhythmic Therapy", "Anti-Arrhythmics - Class 6"],
+    "Diltiazem": ["Anti-Arrhythmic Therapy", "Non-Dihydropyridine Calcium Channel Blockers"],
+    "Verapamil": ["Anti-Arrhythmic Therapy", "Non-Dihydropyridine Calcium Channel Blockers"],
+    "Acetylsalicylic Acid": ["Antiplatelet and Anticoagulant Therapy", "Acetylsalicylic Acid"],
+    "Clopidogrel": ["Antiplatelet and Anticoagulant Therapy", "P2Y12 Inhibitors"],
+    "Prasugrel": ["Antiplatelet and Anticoagulant Therapy", "P2Y12 Inhibitors"],
+    "Ticagrelor": ["Antiplatelet and Anticoagulant Therapy", "P2Y12 Inhibitors"],
+    "Acenocumarol": ["Antiplatelet and Anticoagulant Therapy", "Vitamin K Antagonists"],
+    "Warfarin": ["Antiplatelet and Anticoagulant Therapy", "Vitamin K Antagonists"],
+    "Apixaban": ["Antiplatelet and Anticoagulant Therapy", "Non-VKA Oral Anticoagulants"],
+    "Dabigatran": ["Antiplatelet and Anticoagulant Therapy", "Non-VKA Oral Anticoagulants"],
+    "Edoxaban": ["Antiplatelet and Anticoagulant Therapy", "Non-VKA Oral Anticoagulants"],
+    "Rivaroxaban": ["Antiplatelet and Anticoagulant Therapy", "Non-VKA Oral Anticoagulants"],
+    "Atorvastatin": ["Dyslipidaemia Therapy", "Statins"],
+    "Lovastatin": ["Dyslipidaemia Therapy", "Statins"],
+    "Pravastatin": ["Dyslipidaemia Therapy", "Statins"],
+    "Rosuvastatin": ["Dyslipidaemia Therapy", "Statins"],
+    "Simvastatin": ["Dyslipidaemia Therapy", "Statins"],
+    "Alirocumab": ["Dyslipidaemia Therapy", "PCSK9 Inhibitors"],
+    "Evolocumab": ["Dyslipidaemia Therapy", "PCSK9 Inhibitors"],
+    "Bempedoic Acid": ["Dyslipidaemia Therapy", "Other Dyslipidaemia Therapy"],
+    "Ezetimibe": ["Dyslipidaemia Therapy", "Other Dyslipidaemia Therapy"],
+    "Gemfibrozil": ["Dyslipidaemia Therapy", "Other Dyslipidaemia Therapy"],
+    "Omega-3": ["Dyslipidaemia Therapy", "Other Dyslipidaemia Therapy"]
+};
+
+function updateTherapyAndGroup() {
+    var activeIngredient = document.getElementById('activeIngredient').value.toLowerCase();
+    var therapy = document.getElementById('therapy');
+    var group = document.getElementById('group');
+    var found = false;
+    for (var key in data) {
+        if (key.toLowerCase() === activeIngredient) {
+            therapy.value = data[key][0];
+            group.value = data[key][1];
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        therapy.value = 'N/A';
+        group.value = 'N/A';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    var datalist = document.getElementById('activeIngredients');
+    for (var key in data) {
+        var option = document.createElement('option');
+        option.value = key;
+        datalist.appendChild(option);
+    }
+
+    document.getElementById('height').addEventListener('input', calculateBSA);
+    document.getElementById('weight').addEventListener('input', calculateBSA);
+    document.getElementById('bsa').addEventListener('input', manualBSAUpdate);
+    document.getElementById('indexed').addEventListener('input', updateFromBSA);
+    document.getElementById('deindexed').addEventListener('input', updateFromDeindexed);
+    document.getElementById('activeIngredient').addEventListener('input', updateTherapyAndGroup);
+});
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4">REDCap Toolkit</h1>
+        <h2 class="my-4">Echo</h2>
+        <form>
+            <div class="form-row">
+                <div class="col-md-6 form-group">
+                    <label for="height">Altezza (cm)</label>
+                    <input type="number" class="form-control" id="height" placeholder="Inserisci altezza">
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="weight">Peso (kg)</label>
+                    <input type="number" class="form-control" id="weight" placeholder="Inserisci peso">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="bsa">BSA (m²)</label>
+                <input type="number" class="form-control" id="bsa" placeholder="Inserisci BSA">
+            </div>
+            <div class="form-row">
+                <div class="col-md-6 form-group">
+                    <label for="deindexed">Valore non indicizzato</label>
+                    <input type="number" class="form-control" id="deindexed" placeholder="Inserisci valore da indicizzare">
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="indexed">Valore indicizzato</label>
+                    <input type="number" class="form-control" id="indexed" placeholder="Inserisci valore da deindicizzare">
+                </div>
+            </div>
+            <h2 class="my-4">Therapy</h2>
+            <div class="form-row">
+                <div class="col-md-4 form-group">
+                    <label for="activeIngredient">Principio Attivo</label>
+                    <input list="activeIngredients" class="form-control" id="activeIngredient" placeholder="Inserisci Principio Attivo" oninput="updateTherapyAndGroup()">
+                    <datalist id="activeIngredients">
+                        <!-- Le opzioni verranno generate dinamicamente -->
+                    </datalist>
+                </div>
+               
+                <div class="col-md-4 form-group">
+                    <label for="therapy">Terapia</label>
+                    <input type="text" class="form-control" id="therapy" readonly>
+                </div>
+                <div class="col-md-4 form-group">
+                    <label for="group">Gruppo</label>
+                    <input type="text" class="form-control" id="group" readonly>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
