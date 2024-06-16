@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personality Belief Questionnaire Short Form (PBQ-SF)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+    <div class="container mt-4">
+        <h1>Questionario di Credenza sulla Personalità</h1>
+        <h2>Forma Breve (PBQ-SF)</h2>
+        <p class="lead">Legga le frasi che seguono e indichi quanto crede a ciascuna di esse. Per ciascuna affermazione, provi a giudicare come si sente <b>nella maggior parte dei casi</b>.</p>
+        
+        <!-- Tabs con contenuto -->
+        <div class="tab-content" id="tabContent">
+            <!-- Qui verranno inserite le schede delle domande dinamicamente -->
+        </div>
+
+        <!-- Pulsanti di navigazione -->
+        <div class="d-flex justify-content-between mt-4">
+            <button class="btn btn-primary" id="prevBtn" onclick="changeTab(-1)" style="display: none;">Indietro</button>
+            <button class="btn btn-primary" id="nextBtn" onclick="changeTab(1)">Avanti</button>
+        </div>
+    </div>
+
+    <script>
+const questions = [
+    "Sentirmi inferiore o non all'altezza sarebbe insopportabile",
+    "Dovrei evitare a ogni costo le situazioni spiacevoli",
+    "Se le persone si comportano amichevolmente, è possibile che stiano cercando di usarmi o sfruttarmi",
+    "Devo resistere al controllo delle autorità, ma allo stesso tempo conservare la loro approvazione e accettazione",
+    "Non riesco a tollerare i sentimenti spiacevoli",
+    "Le imperfezioni, i difetti o gli errori sono intollerabili",
+    "Spesso gli altri sono troppo esigenti",
+    "Devo essere al centro dell'attenzione",
+    "Se non seguo un metodo, andrà tutto a rotoli",
+    "È intollerabile che non mi venga accordato il dovuto rispetto o che io non ottenga ciò che mi spetta di diritto",
+    "È importante fare sempre un lavoro perfetto",
+    "Preferisco fare le cose da solo anziché in compagnia",
+    "Se non sto attento, gli altri cercheranno di usarmi o manipolarmi",
+    "Gli altri hanno intenzioni nascoste",
+    "La cosa peggiore in assoluto sarebbe essere abbandonato",
+    "Gli altri dovrebbero riconoscere quanto io sia speciale",
+    "Gli altri cercheranno deliberatamente di sminuirmi",
+    "Ho bisogno che qualcun altro mi aiuti a prendere le decisioni o mi dica che cosa fare",
+    "I dettagli sono estremamente importanti",
+    "Quando mi accorgo che qualcuno è troppo prepotente, ho il diritto di non assecondare le sue richieste",
+    "Le persone investite di una qualche autorità tendono a essere invadenti, esigenti, a intromettersi e controllare",
+    "L'unico modo per ottenere ciò che voglio è far colpo sugli altri",
+    "Se so di farla franca, non vedo perché dovrei privarmi di qualcosa",
+    "Se gli altri verranno a sapere delle cose che mi riguardano, le useranno contro di me",
+    "Le relazioni sono complicate e ti rendono schiavo",
+    "Soltanto le persone brillanti come me possono capirmi",
+    "Poiché sono superiore a chiunque altro, ho diritto a un trattamento speciale e a privilegi",
+    "Per me è importante essere libero e indipendente dagli altri",
+    "In molte situazioni, mi trovo più a mio agio a starmene da solo",
+    "È necessario perseguire sempre gli standard più elevati, altrimenti non si combinerà mai niente nella vita",
+    "Le sensazioni spiacevoli si intensificheranno fino a diventare incontrollabili",
+    "Viviamo in una giungla in cui sopravvivono solo i più forti",
+    "Dovrei evitare le situazioni in cui attiro l'attenzione ed essere il meno appariscente possibile",
+    "Se non mantengo vivo l'interesse degli altri nei miei confronti, non mi accetteranno",
+    "Se voglio una cosa devo fare di tutto per ottenerla",
+    "È meglio starsene da soli che restare 'intrappolati' in una relazione",
+    "Se non diverto la gente o non faccio colpo sulle persone, la vita non ha senso",
+    "La gente mi metterà i piedi in testa, se non lo faccio prima io",
+    "Basta la minima tensione in una relazione per segnalare che va male e che dovrei troncarla",
+    "Se non faccio le cose ai massimi livelli, mostrerò di essere un perdente",
+    "Rispettare le scadenze, soddisfare le richieste e conformarsi costituiscono duri colpi al mio orgoglio e alla mia autosufficienza",
+    "Sono stato trattato ingiustamente e ho il diritto di ottenere con ogni mezzo ciò che mi spetta",
+    "Se mi apro troppo agli altri, scopriranno chi sono realmente e mi rifiuteranno",
+    "Sono debole e bisognoso",
+    "Quando vengo lasciato a me stesso, mi sento impotente",
+    "Gli altri dovrebbero soddisfare i miei bisogni",
+    "Seguire le regole conformandomi alle aspettative degli altri limiterà la mia libertà d'azione",
+    "Se ne darò loro l'opportunità, gli altri si approfitteranno di me",
+    "Devo stare sempre in guardia",
+    "Mantenere la privacy è per me molto più importante di stare in mezzo agli altri",
+    "Le regole sono arbitrarie e mi soffocano",
+    "È terribile se la gente mi ignora",
+    "Non importa ciò che gli altri pensano di me",
+    "Per essere felice, ho bisogno che gli altri prestino attenzione a ciò che faccio",
+    "Se faccio divertire le persone, non noteranno le mie debolezze",
+    "Ho bisogno di qualcuno accanto, sempre disponibile, che mi aiuti a fare le cose o ad affrontare le difficoltà della vita",
+    "Qualsiasi difetto o imperfezione in ciò che faccio potrebbe provocare una catastrofe",
+    "Considerato il mio enorme talento, le persone dovrebbero prodigarsi per promuovere la mia carriera",
+    "Se non mi approfitto degli altri, saranno loro ad approfittarsi di me",
+    "Non devo essere vincolato dalle regole che seguono gli altri",
+    "L'uso della forza o dell'astuzia è il modo migliore per ottenere le cose",
+    "In ogni momento devo avere qualcuno che mi aiuti e mi sorregga",
+    "Sono fondamentalmente solo, a meno che non riesca a legarmi a una persona più forte di me",
+    "Non riesco a fidarmi degli altri",
+    "Non riesco ad affrontare la vita come gli altri"
+];
+        let currentTab = 0;
+
+        function createTabs() {
+            const tabContent = document.getElementById('tabContent');
+            questions.forEach((question, index) => {
+                const div = document.createElement('div');
+                div.className = 'tab-pane fade' + (index === 0 ? ' show active' : '');
+                div.id = 'tab' + index;
+                div.innerHTML = `
+                <div class="card">
+  <div class="card-header text-center">
+    Domanda ${index+1}
+  </div>
+  <div class="card-body">
+        <blockquote class="blockquote text-center">
+                                    ${question}
+                                    </blockquote>
+
+  </div>
+  <div class="card-footer d-flex text-body-secondary justify-content-center">
+<div class="btn-group " role="group" aria-label="Basic radio toggle button group">
+    <input type="radio" class="btn-check" name="options${index}" id="option1-${index}" autocomplete="off" value="4">
+    <label class="btn btn-outline-primary" for="option1-${index}">Ci credo totalmente</label>
+
+    <input type="radio" class="btn-check" name="options${index}" id="option2-${index}" autocomplete="off" value="3">
+    <label class="btn btn-outline-primary" for="option2-${index}">Ci credo molto</label>
+
+    <input type="radio" class="btn-check" name="options${index}" id="option3-${index}" autocomplete="off" value="2">
+    <label class="btn btn-outline-primary" for="option3-${index}">Ci credo moderatamente</label>
+
+    <input type="radio" class="btn-check" name="options${index}" id="option4-${index}" autocomplete="off" value="1">
+    <label class="btn btn-outline-primary" for="option4-${index}">Ci credo poco</label>
+
+    <input type="radio" class="btn-check" name="options${index}" id="option5-${index}" autocomplete="off" value="0">
+    <label class="btn btn-outline-primary" for="option5-${index}">Non ci credo per niente</label>
+</div>
+    
+      </div>
+
+</div>
+                                           
+                        
+                
+                
+                
+                
+                `                ;
+                tabContent.appendChild(div);
+            });
+        }
+
+        function changeTab(step) {
+            // Nascondi la tab corrente
+            document.getElementById('tab' + currentTab).classList.remove('show', 'active');
+
+            // Cambia tab
+            currentTab += step;
+            document.getElementById('tab' + currentTab).classList.add('show', 'active');
+
+            // Gestione della visibilità dei pulsanti
+            document.getElementById('prevBtn').style.display = currentTab === 0 ? 'none' : 'inline-block';
+            document.getElementById('nextBtn').style.display = currentTab === questions.length - 1 ? 'none' : 'inline-block';
+        }
+
+        document.addEventListener('DOMContentLoaded', createTabs);
+    </script>
+
+   
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+    
+    
+    
+</body>
+</html>
