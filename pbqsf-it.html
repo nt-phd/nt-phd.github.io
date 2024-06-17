@@ -1,172 +1,261 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personality Belief Questionnaire Short Form (PBQ-SF)</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body>
 
     <div class="container mt-4">
         <h1>Questionario di Credenza sulla Personalità</h1>
-        <h2>Forma Breve (PBQ-SF)</h2>
-        <p class="lead">Legga le frasi che seguono e indichi quanto crede a ciascuna di esse. Per ciascuna affermazione, provi a giudicare come si sente <b>nella maggior parte dei casi</b>.</p>
-        
-        <!-- Tabs con contenuto -->
-        <div class="tab-content" id="tabContent">
-            <!-- Qui verranno inserite le schede delle domande dinamicamente -->
-        </div>
+        <p class="lead">Forma Breve (PBQ-SF)</p>
 
-        <!-- Pulsanti di navigazione -->
-        <div class="d-flex justify-content-between mt-4">
-            <button class="btn btn-primary" id="prevBtn" onclick="changeTab(-1)" style="display: none;">Indietro</button>
-            <button class="btn btn-primary" id="nextBtn" onclick="changeTab(1)">Avanti</button>
+        <!-- Tabs con contenuto -->
+        <div class="card" id="cardContent">
+            <div class="card-header text-center">
+                Per ciascuna delle seguenti affermazioni, provi a giudicare come si sente <b>nella maggior parte dei
+                    casi</b>.
+            </div>
+
+            <div class="card-body text-center tab-content" id="tabContent">
+                <!-- Qui verranno inserite le schede delle domande dinamicamente -->
+            </div>
+
+            <div class="card-footer d-flex justify-content-between align-items-center">
+                <button class="btn btn-primary" id="prevBtn" onclick="changeTab(-1)">Indietro</button>
+                <div class="progress" style="flex-grow: 1; margin: 0 20px;">
+                    <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0"
+                        aria-valuemax="100" id="progressBar"></div>
+                </div>
+                <button class="btn btn-primary" id="nextBtn" onclick="changeTab(1)">Avanti</button>
+                <button id="calculateBtn" class="btn btn-success" style="display: none;"
+                    onclick="showResults()">Calcola</button>
+            </div>
+
+
         </div>
     </div>
 
     <script>
-const questions = [
-    "Sentirmi inferiore o non all'altezza sarebbe insopportabile",
-    "Dovrei evitare a ogni costo le situazioni spiacevoli",
-    "Se le persone si comportano amichevolmente, è possibile che stiano cercando di usarmi o sfruttarmi",
-    "Devo resistere al controllo delle autorità, ma allo stesso tempo conservare la loro approvazione e accettazione",
-    "Non riesco a tollerare i sentimenti spiacevoli",
-    "Le imperfezioni, i difetti o gli errori sono intollerabili",
-    "Spesso gli altri sono troppo esigenti",
-    "Devo essere al centro dell'attenzione",
-    "Se non seguo un metodo, andrà tutto a rotoli",
-    "È intollerabile che non mi venga accordato il dovuto rispetto o che io non ottenga ciò che mi spetta di diritto",
-    "È importante fare sempre un lavoro perfetto",
-    "Preferisco fare le cose da solo anziché in compagnia",
-    "Se non sto attento, gli altri cercheranno di usarmi o manipolarmi",
-    "Gli altri hanno intenzioni nascoste",
-    "La cosa peggiore in assoluto sarebbe essere abbandonato",
-    "Gli altri dovrebbero riconoscere quanto io sia speciale",
-    "Gli altri cercheranno deliberatamente di sminuirmi",
-    "Ho bisogno che qualcun altro mi aiuti a prendere le decisioni o mi dica che cosa fare",
-    "I dettagli sono estremamente importanti",
-    "Quando mi accorgo che qualcuno è troppo prepotente, ho il diritto di non assecondare le sue richieste",
-    "Le persone investite di una qualche autorità tendono a essere invadenti, esigenti, a intromettersi e controllare",
-    "L'unico modo per ottenere ciò che voglio è far colpo sugli altri",
-    "Se so di farla franca, non vedo perché dovrei privarmi di qualcosa",
-    "Se gli altri verranno a sapere delle cose che mi riguardano, le useranno contro di me",
-    "Le relazioni sono complicate e ti rendono schiavo",
-    "Soltanto le persone brillanti come me possono capirmi",
-    "Poiché sono superiore a chiunque altro, ho diritto a un trattamento speciale e a privilegi",
-    "Per me è importante essere libero e indipendente dagli altri",
-    "In molte situazioni, mi trovo più a mio agio a starmene da solo",
-    "È necessario perseguire sempre gli standard più elevati, altrimenti non si combinerà mai niente nella vita",
-    "Le sensazioni spiacevoli si intensificheranno fino a diventare incontrollabili",
-    "Viviamo in una giungla in cui sopravvivono solo i più forti",
-    "Dovrei evitare le situazioni in cui attiro l'attenzione ed essere il meno appariscente possibile",
-    "Se non mantengo vivo l'interesse degli altri nei miei confronti, non mi accetteranno",
-    "Se voglio una cosa devo fare di tutto per ottenerla",
-    "È meglio starsene da soli che restare 'intrappolati' in una relazione",
-    "Se non diverto la gente o non faccio colpo sulle persone, la vita non ha senso",
-    "La gente mi metterà i piedi in testa, se non lo faccio prima io",
-    "Basta la minima tensione in una relazione per segnalare che va male e che dovrei troncarla",
-    "Se non faccio le cose ai massimi livelli, mostrerò di essere un perdente",
-    "Rispettare le scadenze, soddisfare le richieste e conformarsi costituiscono duri colpi al mio orgoglio e alla mia autosufficienza",
-    "Sono stato trattato ingiustamente e ho il diritto di ottenere con ogni mezzo ciò che mi spetta",
-    "Se mi apro troppo agli altri, scopriranno chi sono realmente e mi rifiuteranno",
-    "Sono debole e bisognoso",
-    "Quando vengo lasciato a me stesso, mi sento impotente",
-    "Gli altri dovrebbero soddisfare i miei bisogni",
-    "Seguire le regole conformandomi alle aspettative degli altri limiterà la mia libertà d'azione",
-    "Se ne darò loro l'opportunità, gli altri si approfitteranno di me",
-    "Devo stare sempre in guardia",
-    "Mantenere la privacy è per me molto più importante di stare in mezzo agli altri",
-    "Le regole sono arbitrarie e mi soffocano",
-    "È terribile se la gente mi ignora",
-    "Non importa ciò che gli altri pensano di me",
-    "Per essere felice, ho bisogno che gli altri prestino attenzione a ciò che faccio",
-    "Se faccio divertire le persone, non noteranno le mie debolezze",
-    "Ho bisogno di qualcuno accanto, sempre disponibile, che mi aiuti a fare le cose o ad affrontare le difficoltà della vita",
-    "Qualsiasi difetto o imperfezione in ciò che faccio potrebbe provocare una catastrofe",
-    "Considerato il mio enorme talento, le persone dovrebbero prodigarsi per promuovere la mia carriera",
-    "Se non mi approfitto degli altri, saranno loro ad approfittarsi di me",
-    "Non devo essere vincolato dalle regole che seguono gli altri",
-    "L'uso della forza o dell'astuzia è il modo migliore per ottenere le cose",
-    "In ogni momento devo avere qualcuno che mi aiuti e mi sorregga",
-    "Sono fondamentalmente solo, a meno che non riesca a legarmi a una persona più forte di me",
-    "Non riesco a fidarmi degli altri",
-    "Non riesco ad affrontare la vita come gli altri"
-];
-        let currentTab = 0;
 
-        function createTabs() {
-            const tabContent = document.getElementById('tabContent');
-            questions.forEach((question, index) => {
-                const div = document.createElement('div');
-                div.className = 'tab-pane fade' + (index === 0 ? ' show active' : '');
-                div.id = 'tab' + index;
-                div.innerHTML = `
-                <div class="card">
-  <div class="card-header text-center">
-    Domanda ${index+1}
-  </div>
-  <div class="card-body">
-        <blockquote class="blockquote text-center">
-                                    ${question}
-                                    </blockquote>
+        document.addEventListener('DOMContentLoaded', function () {
+            const questions = [
+                "Sentirmi inferiore o non all'altezza sarebbe insopportabile",
+                "Dovrei evitare a ogni costo le situazioni spiacevoli",
+                "Se le persone si comportano amichevolmente, è possibile che stiano cercando di usarmi o sfruttarmi",
+                "Devo resistere al controllo delle autorità, ma allo stesso tempo conservare la loro approvazione e accettazione",
+                "Non riesco a tollerare i sentimenti spiacevoli",
+                "Le imperfezioni, i difetti o gli errori sono intollerabili",
+                "Spesso gli altri sono troppo esigenti",
+                "Devo essere al centro dell'attenzione",
+                "Se non seguo un metodo, andrà tutto a rotoli",
+                "È intollerabile che non mi venga accordato il dovuto rispetto o che io non ottenga ciò che mi spetta di diritto",
+                "È importante fare sempre un lavoro perfetto",
+                "Preferisco fare le cose da solo anziché in compagnia",
+                "Se non sto attento, gli altri cercheranno di usarmi o manipolarmi",
+                "Gli altri hanno intenzioni nascoste",
+                "La cosa peggiore in assoluto sarebbe essere abbandonato",
+                "Gli altri dovrebbero riconoscere quanto io sia speciale",
+                "Gli altri cercheranno deliberatamente di sminuirmi",
+                "Ho bisogno che qualcun altro mi aiuti a prendere le decisioni o mi dica che cosa fare",
+                "I dettagli sono estremamente importanti",
+                "Quando mi accorgo che qualcuno è troppo prepotente, ho il diritto di non assecondare le sue richieste",
+                "Le persone investite di una qualche autorità tendono a essere invadenti, esigenti, a intromettersi e controllare",
+                "L'unico modo per ottenere ciò che voglio è far colpo sugli altri",
+                "Se so di farla franca, non vedo perché dovrei privarmi di qualcosa",
+                "Se gli altri verranno a sapere delle cose che mi riguardano, le useranno contro di me",
+                "Le relazioni sono complicate e ti rendono schiavo",
+                "Soltanto le persone brillanti come me possono capirmi",
+                "Poiché sono superiore a chiunque altro, ho diritto a un trattamento speciale e a privilegi",
+                "Per me è importante essere libero e indipendente dagli altri",
+                "In molte situazioni, mi trovo più a mio agio a starmene da solo",
+                "È necessario perseguire sempre gli standard più elevati, altrimenti non si combinerà mai niente nella vita",
+                "Le sensazioni spiacevoli si intensificheranno fino a diventare incontrollabili",
+                "Viviamo in una giungla in cui sopravvivono solo i più forti",
+                "Dovrei evitare le situazioni in cui attiro l'attenzione ed essere il meno appariscente possibile",
+                "Se non mantengo vivo l'interesse degli altri nei miei confronti, non mi accetteranno",
+                "Se voglio una cosa devo fare di tutto per ottenerla",
+                "È meglio starsene da soli che restare 'intrappolati' in una relazione",
+                "Se non diverto la gente o non faccio colpo sulle persone, la vita non ha senso",
+                "La gente mi metterà i piedi in testa, se non lo faccio prima io",
+                "Basta la minima tensione in una relazione per segnalare che va male e che dovrei troncarla",
+                "Se non faccio le cose ai massimi livelli, mostrerò di essere un perdente",
+                "Rispettare le scadenze, soddisfare le richieste e conformarsi costituiscono duri colpi al mio orgoglio e alla mia autosufficienza",
+                "Sono stato trattato ingiustamente e ho il diritto di ottenere con ogni mezzo ciò che mi spetta",
+                "Se mi apro troppo agli altri, scopriranno chi sono realmente e mi rifiuteranno",
+                "Sono debole e bisognoso",
+                "Quando vengo lasciato a me stesso, mi sento impotente",
+                "Gli altri dovrebbero soddisfare i miei bisogni",
+                "Seguire le regole conformandomi alle aspettative degli altri limiterà la mia libertà d'azione",
+                "Se ne darò loro l'opportunità, gli altri si approfitteranno di me",
+                "Devo stare sempre in guardia",
+                "Mantenere la privacy è per me molto più importante di stare in mezzo agli altri",
+                "Le regole sono arbitrarie e mi soffocano",
+                "È terribile se la gente mi ignora",
+                "Non importa ciò che gli altri pensano di me",
+                "Per essere felice, ho bisogno che gli altri prestino attenzione a ciò che faccio",
+                "Se faccio divertire le persone, non noteranno le mie debolezze",
+                "Ho bisogno di qualcuno accanto, sempre disponibile, che mi aiuti a fare le cose o ad affrontare le difficoltà della vita",
+                "Qualsiasi difetto o imperfezione in ciò che faccio potrebbe provocare una catastrofe",
+                "Considerato il mio enorme talento, le persone dovrebbero prodigarsi per promuovere la mia carriera",
+                "Se non mi approfitto degli altri, saranno loro ad approfittarsi di me",
+                "Non devo essere vincolato dalle regole che seguono gli altri",
+                "L'uso della forza o dell'astuzia è il modo migliore per ottenere le cose",
+                "In ogni momento devo avere qualcuno che mi aiuti e mi sorregga",
+                "Sono fondamentalmente solo, a meno che non riesca a legarmi a una persona più forte di me",
+                "Non riesco a fidarmi degli altri",
+                "Non riesco ad affrontare la vita come gli altri"
+            ];
+            let currentTab = 0;
 
-  </div>
-  <div class="card-footer d-flex text-body-secondary justify-content-center">
-<div class="btn-group " role="group" aria-label="Basic radio toggle button group">
-    <input type="radio" class="btn-check" name="options${index}" id="option1-${index}" autocomplete="off" value="4">
-    <label class="btn btn-outline-primary" for="option1-${index}">Ci credo totalmente</label>
 
-    <input type="radio" class="btn-check" name="options${index}" id="option2-${index}" autocomplete="off" value="3">
-    <label class="btn btn-outline-primary" for="option2-${index}">Ci credo molto</label>
 
-    <input type="radio" class="btn-check" name="options${index}" id="option3-${index}" autocomplete="off" value="2">
-    <label class="btn btn-outline-primary" for="option3-${index}">Ci credo moderatamente</label>
+            createTabs();
+            setupEventListeners();
 
-    <input type="radio" class="btn-check" name="options${index}" id="option4-${index}" autocomplete="off" value="1">
-    <label class="btn btn-outline-primary" for="option4-${index}">Ci credo poco</label>
+            function createTabs() {
+                const tabContent = document.getElementById('tabContent');
+                questions.forEach((question, index) => {
+                    const div = document.createElement('div');
+                    div.className = `tab-pane fade ${index === 0 ? 'show active' : ''}`;
+                    div.id = `tab${index}`;
+                    div.innerHTML = `
+            <blockquote class="blockquote mt-5 mb-5">${question}</blockquote>
+            <div class="btn-group-vertical" role="group" aria-label="Vertical radio toggle button group">
+                ${[4, 3, 2, 1, 0].map(value => `
+                    <input type="radio" class="btn-check" name="options${index}" id="option${5 - value}-${index}" autocomplete="off" value="${value}">
+                    <label class="btn btn-outline-primary" for="option${5 - value}-${index}">${['Ci credo totalmente', 'Ci credo molto', 'Ci credo moderatamente', 'Ci credo poco', 'Non ci credo per niente'][5 - value - 1]}</label>
+                `).join('')}
+            </div>
+        `;
+                    tabContent.appendChild(div);
+                });
+            }
 
-    <input type="radio" class="btn-check" name="options${index}" id="option5-${index}" autocomplete="off" value="0">
-    <label class="btn btn-outline-primary" for="option5-${index}">Non ci credo per niente</label>
-</div>
-    
-      </div>
+            function setupEventListeners() {
+                document.querySelectorAll('.btn-check').forEach(input => {
+                    input.addEventListener('change', function () {
+                        let currentQuestionOptions = document.getElementsByName(`options${currentTab}`);
+                        if (Array.from(currentQuestionOptions).some(opt => opt.checked)) {
+                            if (currentTab < questions.length - 1) {
+                                changeTab(1); // Move to the next tab automatically
+                            }
+                            updateNavigationControls();
+                        }
+                    });
+                });
 
-</div>
-                                           
-                        
-                
-                
-                
-                
-                `                ;
-                tabContent.appendChild(div);
-            });
-        }
+                document.getElementById('prevBtn').addEventListener('click', () => changeTab(-1));
+                document.getElementById('nextBtn').addEventListener('click', () => changeTab(1));
+                document.getElementById('calculateBtn').addEventListener('click', () => showResults());
+            }
 
-        function changeTab(step) {
-            // Nascondi la tab corrente
-            document.getElementById('tab' + currentTab).classList.remove('show', 'active');
+            function changeTab(step) {
+                currentTab += step;
 
-            // Cambia tab
-            currentTab += step;
-            document.getElementById('tab' + currentTab).classList.add('show', 'active');
+                // Ensure tab index stays within range
+                currentTab = Math.max(0, Math.min(currentTab, questions.length - 1));
+                updateTabVisibility();
+                updateNavigationControls();
+            }
 
-            // Gestione della visibilità dei pulsanti
-            document.getElementById('prevBtn').style.display = currentTab === 0 ? 'none' : 'inline-block';
-            document.getElementById('nextBtn').style.display = currentTab === questions.length - 1 ? 'none' : 'inline-block';
-        }
+            function updateTabVisibility() {
+                document.querySelectorAll('.tab-pane').forEach((pane, index) => {
+                    pane.classList.remove('show', 'active');
+                    if (index === currentTab) {
+                        pane.classList.add('show', 'active');
+                    }
+                });
+            }
 
-        document.addEventListener('DOMContentLoaded', createTabs);
+            function updateNavigationControls() {
+                // Disable the "Previous" button if it's the first question
+                document.getElementById('prevBtn').disabled = (currentTab === 0);
+
+                // Check if any radio button in the current tab is checked
+                let anyOptionSelected = document.querySelector(`#tab${currentTab} .btn-check:checked`) !== null;
+
+                // Manage the "Next" button
+                if (currentTab === questions.length - 1) {
+                    // Hide "Next" and show "Calculate" in the last tab
+                    document.getElementById('nextBtn').style.display = 'none';
+                    document.getElementById('calculateBtn').style.display = 'block';
+                    // Disable "Calculate" button if no option is selected
+                    document.getElementById('calculateBtn').disabled = !anyOptionSelected;
+                } else {
+                    // Otherwise, show "Next" and ensure "Calculate" is hidden
+                    document.getElementById('nextBtn').style.display = 'block';
+                    document.getElementById('calculateBtn').style.display = 'none';
+                    // Disable "Next" button if no option is selected
+                    document.getElementById('nextBtn').disabled = !anyOptionSelected;
+                }
+
+                // Update the progress bar
+                updateProgressBar();
+            }
+
+            function updateProgressBar() {
+                const progressBar = document.getElementById('progressBar');
+                const completedPercentage = ((currentTab + 1) / questions.length) * 100;
+                progressBar.style.width = `${completedPercentage}%`;
+                progressBar.setAttribute('aria-valuenow', completedPercentage);
+            }
+
+
+            function showResults() {
+                const userScores = Array.from(document.querySelectorAll('.btn-check:checked'), input => parseInt(input.value));
+
+                const personalityProfiles = {
+                    "Evitante": [1, 2, 5, 31, 33, 39, 43].map(i => i - 1),
+                    "Dipendente": [15, 18, 44, 45, 56, 62, 63].map(i => i - 1),
+                    "Passivo-aggressivo": [4, 7, 20, 21, 41, 47, 51].map(i => i - 1),
+                    "Ossessivo-compulsivo": [6, 9, 11, 19, 30, 40, 57].map(i => i - 1),
+                    "Antisociale": [23, 32, 35, 38, 42, 59, 61].map(i => i - 1),
+                    "Narcisistico": [10, 16, 26, 27, 46, 58, 60].map(i => i - 1),
+                    "Istrionico": [8, 22, 34, 37, 52, 54, 55].map(i => i - 1),
+                    "Schizoide": [12, 25, 28, 29, 36, 50, 53].map(i => i - 1),
+                    "Paranoide": [3, 13, 14, 17, 24, 48, 49].map(i => i - 1),
+                    "Borderline": [31, 44, 45, 49, 56, 64, 65].map(i => i - 1)
+                };
+                const profileScores = {};
+                Object.keys(personalityProfiles).forEach(profile => {
+                    profileScores[profile] = personalityProfiles[profile].reduce((sum, index) => sum + userScores[index], 0);
+                });
+
+                const sortedProfiles = Object.entries(profileScores).sort((a, b) => b[1] - a[1]);
+                const maxScore = Math.max(...Object.values(profileScores));
+
+                let resultsHTML = sortedProfiles.map(([profile, score]) => {
+                    const percentage = (score / maxScore * 100).toFixed(0);
+                    return `
+                <div class="profile-result">
+                    <strong>${profile}:</strong> ${percentage}% 
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: ${percentage}%" aria-valuenow="${percentage}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+            `;
+                }).join('');
+
+                const resultsDiv = document.getElementById('cardContent');
+                resultsDiv.className = 'card';
+                resultsDiv.innerHTML = `
+            <div class="card-header">Risultati del Profilo di Personalità</div>
+            <div class="card-body">${resultsHTML}</div>
+        `;
+                document.getElementById('tabContent').appendChild(resultsDiv);
+                document.getElementById('calculateBtn').style.display = 'none';
+            }
+
+        });
+
     </script>
-
-   
-
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
 
-    
-    
-    
 </body>
+
 </html>
