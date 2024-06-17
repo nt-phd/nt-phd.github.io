@@ -227,7 +227,7 @@
                 });
 
                 const sortedProfiles = Object.entries(profileScores).sort((a, b) => b[1] - a[1]);
-                const maxScore = Math.max(...Object.values(profileScores));
+                const maxScore = 28; // Math.max(...Object.values(profileScores));
 
                 let resultsHTML = sortedProfiles.map(([profile, score]) => {
                     const percentage = (score / maxScore * 100).toFixed(0);
