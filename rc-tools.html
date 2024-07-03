@@ -10,6 +10,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
+        function openTabs() {
+            window.open('https://mediately.co/it/', '_blank');
+            window.open('https://redcap.univpm.it/', '_blank');
+        }
+        
         function calculateBSA() {
             var height = parseFloat(document.getElementById('height').value) || 0;
             var weight = parseFloat(document.getElementById('weight').value) || 0;
@@ -204,7 +209,7 @@
 <body>
     <div class="container">
         <h1 class="my-4">REDCap Toolkit</h1>
-        
+        <button onclick="openTabs()">Apri Schede</button>
         <h4 class="my-4">Echo</h4>
 
         <form>
