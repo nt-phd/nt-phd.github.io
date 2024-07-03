@@ -34,7 +34,7 @@
             var indexed = parseFloat(document.getElementById('indexed').value) || 0;
             var bsa = parseFloat(document.getElementById('bsa').value) || 0;
             if (bsa > 0 && indexed > 0) {
-                var deindexed = (indexed * bsa).toFixed(2);
+                var deindexed = (indexed * bsa).toFixed(1);
                 document.getElementById('deindexed').value = deindexed;
             }
         }
@@ -43,7 +43,7 @@
             var deindexed = parseFloat(document.getElementById('deindexed').value) || 0;
             var bsa = parseFloat(document.getElementById('bsa').value) || 0;
             if (bsa > 0 && deindexed > 0) {
-                var indexed = (deindexed / bsa).toFixed(2);
+                var indexed = (deindexed / bsa).toFixed(1);
                 document.getElementById('indexed').value = indexed;
             }
         }
