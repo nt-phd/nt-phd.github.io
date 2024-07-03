@@ -10,9 +10,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        function openTabs() {
-            window.open('https://mediately.co/it/', '_blank');
-            window.open('https://redcap.univpm.it/', '_blank');
+        function openTabs() {         
+            window.open(atob('aHR0cHM6Ly9tZWRpYXRlbHkuY28vaXQv'), '_blank');
+            window.open(atob('aHR0cHM6Ly9yZWRjYXAudW5pdnBtLml0Lw=='), '_blank');
         }
         
         function calculateBSA() {
@@ -209,7 +209,9 @@
 <body>
     <div class="container">
         <h1 class="my-4">REDCap Toolkit</h1>
-        <button onclick="openTabs()">Apri Schede</button>
+        <div class="container text-center mt-5">
+            <button onclick="openTabs()" class="btn btn-primary">Apri Schede</button>
+        </div>
         <h4 class="my-4">Echo</h4>
 
         <form>
