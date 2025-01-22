@@ -268,13 +268,13 @@
                     // Generate result HTML
                     let resultHTML = `Il suo punteggio KCCQ è: <b>${kccqScore}</b><br>`;
 
-                    /*   
+                    
                     // Print scores for each domain
                     Object.keys(domainScores).forEach(domain => {
                         let average = domainCounts[domain] > 0 ? domainScores[domain] / domainCounts[domain].toFixed(2) : 'N/A';
                         resultHTML += `<b>${domain.replace(/_/g, ' ')} Score: ${domainScores[domain].toFixed(2)} (Average: ${average})</b><br>`;
                     });
-                    */
+                    
 
                     resultBox.innerHTML = resultHTML;
                     resultBox.style.display = 'block';
