@@ -154,8 +154,6 @@
 
             const resultBox = document.getElementById("result-box");
 
-            /**/
-
             function initializeFormData() {
                 const inputs = document.querySelectorAll('input[type="radio"]');
                 inputs.forEach(input => {
@@ -166,36 +164,11 @@
             }
 
 
-            function filterFormDataForSpecificDomains(formData, domainQuestions) {
-    const ignoreValues = ["6"]; // Valore associato a "Non l'ho fatto per altre ragioni"
-    const domainsToFilter = ['physical_limitations', 'social_interference']; // Domini da filtrare
-    let filteredData = new FormData();
-
-    formData.forEach((value, key) => {
-        let include = true;
-
-        // Controlla se la domanda appartiene ai domini specifici
-        Object.keys(domainQuestions).forEach(domain => {
-            if (domainsToFilter.includes(domain) && domainQuestions[domain].includes(key)) {
-                if (ignoreValues.includes(value)) {
-                    include = false; // Escludi questa risposta
-                }
-            }
-        });
-
-        if (include) {
-            filteredData.append(key, value);
-        }
-    });
-
-    return filteredData;
-}
-
 
 
             form.addEventListener("submit", function (event) {
                 event.preventDefault();
-let formData = filterFormDataForSpecificDomains(new FormData(form), domainQuestions);
+                let formData = new FormData(form);
 
                 let domainScores = {
                     'physical_limitations': 0,
@@ -295,13 +268,13 @@ let formData = filterFormDataForSpecificDomains(new FormData(form), domainQuesti
                     // Generate result HTML
                     let resultHTML = `Il suo punteggio KCCQ è: <b>${kccqScore}</b><br>`;
 
-                    
+                    /*   
                     // Print scores for each domain
                     Object.keys(domainScores).forEach(domain => {
                         let average = domainCounts[domain] > 0 ? domainScores[domain] / domainCounts[domain].toFixed(2) : 'N/A';
                         resultHTML += `<b>${domain.replace(/_/g, ' ')} Score: ${domainScores[domain].toFixed(2)} (Average: ${average})</b><br>`;
                     });
-                    
+                    */
 
                     resultBox.innerHTML = resultHTML;
                     resultBox.style.display = 'block';
