@@ -98,22 +98,30 @@ function removeOptionSix(formData) {
                     let optionsDiv = document.createElement("div");
                     optionsDiv.classList.add("m-2");
 
-                    question.options.forEach(option => {
-                        let optionIndex = question.options.indexOf(option) + 1;
-                        let inputId = `q${index + 1}_option${optionIndex}`;
+question.options.forEach(option => {
+    let optionIndex = question.options.indexOf(option) + 1;
+    let inputId = `q${index + 1}_option${optionIndex}`;
 
+    let optionDiv = document.createElement("div");
+    optionDiv.classList.add("form-check");
+    optionDiv.style.marginLeft = "1rem";
 
-                        let optionDiv = document.createElement("div");
-                        optionDiv.classList.add("form-check");
-                        optionDiv.style.marginLeft = "1rem";
+    // Se l'opzione è 6 e appartiene ai domini q1 o q15
+    if ((index === 0 || index === 14) && optionIndex === 6) {
+        optionDiv.innerHTML = `
+            <input class="form-check-input" type="radio" id="${inputId}" name="q${index + 1}" value="0">
+            <label class="form-check-label text-muted" for="${inputId}" style="color: gray;">${option}</label>
+        `;
+    } else {
+        optionDiv.innerHTML = `
+            <input class="form-check-input" type="radio" id="${inputId}" name="q${index + 1}" value="${optionIndex}">
+            <label class="form-check-label" for="${inputId}">${option}</label>
+        `;
+    }
 
-                        optionDiv.innerHTML = `
-                <input class="form-check-input" type="radio" id="${inputId}" name="q${index + 1}" value="${optionIndex}">
-                <label class="form-check-label" for="${inputId}">${option}</label>
-            `;
+    optionsDiv.appendChild(optionDiv);
+});
 
-                        optionsDiv.appendChild(optionDiv);
-                    });
 
                     questionDiv.appendChild(optionsDiv);
                 }
