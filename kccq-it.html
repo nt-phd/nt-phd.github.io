@@ -154,6 +154,8 @@
 
             const resultBox = document.getElementById("result-box");
 
+            /**/
+
             function initializeFormData() {
                 const inputs = document.querySelectorAll('input[type="radio"]');
                 inputs.forEach(input => {
@@ -164,11 +166,36 @@
             }
 
 
+            function filterFormDataForSpecificDomains(formData, domainQuestions) {
+    const ignoreValues = ["6"]; // Valore associato a "Non l'ho fatto per altre ragioni"
+    const domainsToFilter = ['physical_limitations', 'social_interference']; // Domini da filtrare
+    let filteredData = new FormData();
+
+    formData.forEach((value, key) => {
+        let include = true;
+
+        // Controlla se la domanda appartiene ai domini specifici
+        Object.keys(domainQuestions).forEach(domain => {
+            if (domainsToFilter.includes(domain) && domainQuestions[domain].includes(key)) {
+                if (ignoreValues.includes(value)) {
+                    include = false; // Escludi questa risposta
+                }
+            }
+        });
+
+        if (include) {
+            filteredData.append(key, value);
+        }
+    });
+
+    return filteredData;
+}
+
 
 
             form.addEventListener("submit", function (event) {
                 event.preventDefault();
-                let formData = new FormData(form);
+let formData = filterFormDataForSpecificDomains(new FormData(form), domainQuestions);
 
                 let domainScores = {
                     'physical_limitations': 0,
