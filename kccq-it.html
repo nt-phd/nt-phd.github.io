@@ -9,6 +9,15 @@
 
 
     <script>
+
+function normalizeResponses(formData) {
+    for (let [key, value] of formData.entries()) {
+        if ((key.startsWith("q1") || key.startsWith("q15")) && value === "6") {
+            formData.set(key, 0); // Set NA per l'opzione 6
+        }
+    }
+}
+
         document.addEventListener("DOMContentLoaded", function () {
             const questions = [
                 {
