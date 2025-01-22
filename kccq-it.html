@@ -9,8 +9,6 @@
 
 
     <script>
-
-
         document.addEventListener("DOMContentLoaded", function () {
             const questions = [
                 {
@@ -90,30 +88,22 @@
                     let optionsDiv = document.createElement("div");
                     optionsDiv.classList.add("m-2");
 
-question.options.forEach(option => {
-    let optionIndex = question.options.indexOf(option) + 1;
-    let inputId = `q${index + 1}_option${optionIndex}`;
+                    question.options.forEach(option => {
+                        let optionIndex = question.options.indexOf(option) + 1;
+                        let inputId = `q${index + 1}_option${optionIndex}`;
 
-    let optionDiv = document.createElement("div");
-    optionDiv.classList.add("form-check");
-    optionDiv.style.marginLeft = "1rem";
 
-    // Se l'opzione è 6 e appartiene ai domini q1 o q15
-    if ((index === 0 || index === 14) && optionIndex === 6) {
-        optionDiv.innerHTML = `
-            <input class="form-check-input" type="radio" id="${inputId}" name="q${index + 1}" value="0">
-            <label class="form-check-label text-muted" for="${inputId}" style="color: gray;">${option}</label>
-        `;
-    } else {
-        optionDiv.innerHTML = `
-            <input class="form-check-input" type="radio" id="${inputId}" name="q${index + 1}" value="${optionIndex}">
-            <label class="form-check-label" for="${inputId}">${option}</label>
-        `;
-    }
+                        let optionDiv = document.createElement("div");
+                        optionDiv.classList.add("form-check");
+                        optionDiv.style.marginLeft = "1rem";
 
-    optionsDiv.appendChild(optionDiv);
-});
+                        optionDiv.innerHTML = `
+                <input class="form-check-input" type="radio" id="${inputId}" name="q${index + 1}" value="${optionIndex}">
+                <label class="form-check-label" for="${inputId}">${option}</label>
+            `;
 
+                        optionsDiv.appendChild(optionDiv);
+                    });
 
                     questionDiv.appendChild(optionsDiv);
                 }
@@ -143,9 +133,16 @@ question.options.forEach(option => {
                         let row = `<tr><th scope="row">${activity}</th>`;
                         for (let i = 1; i <= question.options.length; i++) {
                             let inputId = `q${index + 1}_${actIndex + 1}_${i}`;
-                            row += `<td class="text-center align-middle" style="cursor: pointer;" onclick="document.getElementById('${inputId}').checked = true;">
+                            if(i == 6){
+                                row += `<td class="text-center align-middle" style="cursor: pointer;" onclick="document.getElementById('${inputId}').checked = true;">
+                <input class="form-check-input" type="radio" id="${inputId}" name="q${index + 1}_${actIndex + 1}" value="0">
+            </td>`;
+                            } else {
+                                row += `<td class="text-center align-middle" style="cursor: pointer;" onclick="document.getElementById('${inputId}').checked = true;">
                 <input class="form-check-input" type="radio" id="${inputId}" name="q${index + 1}_${actIndex + 1}" value="${i}">
             </td>`;
+                            }
+
                         }
                         row += `</tr>`;
                         tbody.innerHTML += row;
@@ -266,7 +263,7 @@ question.options.forEach(option => {
                         domainQuestions[domain].forEach(question => {
                             minScore += 1; // Minimum score is 1 per question
                             const options = document.querySelectorAll(`input[name="${question}"]`);
-                            maxScore += options.length; // Number of options is the max score for that question
+                            maxScore += Math.max(...[...options].map(o => +o.value));              // Number of options is the max score for that question
                         });
                     });
 
