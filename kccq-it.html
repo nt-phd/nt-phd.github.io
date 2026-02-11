@@ -4,16 +4,17 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KCCQ - Questionario sullo scompenso cardiaco</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 
     <style>
-        /* Contrasto migliorato tramite CSS custom properties di Bootstrap */
+        /* Radio button — alto contrasto tramite variabili Bootstrap */
         .form-check-input {
-            --bs-border-width: 2px;
-            --bs-border-color: var(--bs-dark);
             width: 1.25em;
             height: 1.25em;
+            border: 2px solid var(--bs-dark);
+            cursor: pointer;
         }
         .form-check-input:checked {
             background-color: var(--bs-dark);
@@ -24,28 +25,29 @@
             box-shadow: 0 0 0 0.25rem rgba(var(--bs-dark-rgb), 0.25);
         }
 
-        /* Stili di stampa */
+        /* Hover sulle opzioni a griglia */
+        .option-label {
+            transition: background-color .15s;
+        }
+        .option-label:hover {
+            background-color: var(--bs-tertiary-bg);
+        }
+
+        /* Stampa */
         @media print {
             body {
                 font-size: 11pt;
-                color: #000;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
-
-            .container {
-                max-width: 100%;
-                padding: 0;
-                margin: 0;
-            }
-
-            .btn {
-                display: none !important;
-            }
-
-            #result-box {
-                display: none !important;
-            }
+            .container { max-width: 100%; padding: 0; margin: 0; }
+            .bg-body-tertiary { background-color: #fff !important; }
+            .shadow-sm { box-shadow: none !important; }
+            .rounded-3 { border-radius: 0 !important; }
+            .btn { display: none !important; }
+            #result-box { display: none !important; }
+            h1 { font-size: 18pt; }
+            .lead { font-size: 11pt; }
 
             .form-check-input {
                 border: 2px solid #000 !important;
@@ -56,38 +58,22 @@
                 background: #fff !important;
                 border-radius: 50%;
             }
-
             .form-check-input:checked {
                 background: #000 !important;
                 border-color: #000 !important;
-            }
-
-            .table {
-                border-collapse: collapse;
             }
 
             .table td, .table th {
                 border: 1px solid #000 !important;
                 padding: 4px 6px;
             }
-
             .table-striped > tbody > tr:nth-of-type(odd) {
                 background-color: #eee !important;
             }
 
-            h1 {
-                font-size: 18pt;
-            }
-
-            .lead {
-                font-size: 11pt;
-            }
-
-            /* Evita che domande vengano tagliate a metà pagina */
             .form-group {
                 break-inside: avoid;
                 page-break-inside: avoid;
-                margin-bottom: 12pt;
             }
         }
     </style>
@@ -97,7 +83,7 @@
             const questions = [
                 {
                     label: "1. Lo scompenso cardiaco influisce su persone diverse in modo diverso. Alcuni hanno difficoltà a respirare mentre altri si sentono stanchi. Per cortesia indichi quanto lo scompenso cardiaco (difficoltà a respirare o stanchezza) ha limitato la sua capacità di fare le seguenti attività nelle ultime 2 settimane.",
-                    activities: ["Vestirsi", "Fare il bagno o la doccia", "Camminare in piano per circa 100 metri", "Fare piccoli lavori di giardinaggio o intorno alla casa, lavori domestici, portare la spesa", "Fare una decina di scalini a piedi senza fermarsi", "Affrettarsi o correre (come per prendere l’autobus)"],
+                    activities: ["Vestirsi", "Fare il bagno o la doccia", "Camminare in piano per circa 100 metri", "Fare piccoli lavori di giardinaggio o intorno alla casa, lavori domestici, portare la spesa", "Fare una decina di scalini a piedi senza fermarsi", "Affrettarsi o correre (come per prendere l'autobus)"],
                     options: ["Estremamente limitato", "Molto limitato", "Moderatamente limitato", "Poco limitato", "Per niente limitato", "Limitato per altre ragioni"]
                 },
                 {
@@ -155,7 +141,7 @@
                 {
                     label: "15. In che misura lo scompenso cardiaco influisce sul suo stile di vita? Per cortesia, indichi quanto lo scompenso cardiaco può aver limitato la sua partecipazione alle seguenti attività nelle ultime 2 settimane.",
                     activities: ["Passatempi, attività di svago", "Lavorare o fare dei lavori in casa", "Andare a trovare amici o familiari", "Relazioni intime con la persona amata"],
-                    options: ["Estremamente limitato", "Molto limitato", "Moderatamente limitato", "Poco limitato", "Per niente limitato", "Non è il mio caso o non l’ho fatto per altre ragioni"]
+                    options: ["Estremamente limitato", "Molto limitato", "Moderatamente limitato", "Poco limitato", "Per niente limitato", "Non è il mio caso o non l'ho fatto per altre ragioni"]
                 }
             ];
 
@@ -164,101 +150,70 @@
 
             questions.forEach((question, index) => {
                 let questionDiv = document.createElement("div");
-                questionDiv.classList.add("form-group");
-                questionDiv.innerHTML = `<label><b>${question.label}</b></label>`;
+                questionDiv.classList.add("form-group", "mb-4", "pb-3", "border-bottom");
+                questionDiv.innerHTML = `<p class="fw-semibold mb-3">${question.label}</p>`;
 
                 if (!question.activities) {
-                    let tableWrapper = document.createElement("div");
-                    tableWrapper.classList.add("table-responsive");
+                    // Griglia Bootstrap con colonne equidistanti
+                    let optionsRow = document.createElement("div");
+                    optionsRow.classList.add("row", "g-2", "text-center");
 
-                    let table = document.createElement("table");
-                    table.classList.add("table", "table-bordered", "text-center", "align-middle", "mt-2");
-
-                    let headerRow = '<thead><tr>';
-                    question.options.forEach(option => {
-                        headerRow += `<th scope="col" class="fw-normal small">${option}</th>`;
-                    });
-                    headerRow += '</tr></thead>';
-
-                    let bodyRow = '<tbody><tr>';
                     question.options.forEach((option, optIdx) => {
                         let optionIndex = optIdx + 1;
                         let inputId = `q${index + 1}_option${optionIndex}`;
-                        bodyRow += `<td class="align-middle" style="cursor:pointer" onclick="document.getElementById('${inputId}').checked = true;">
-                            <input class="form-check-input" type="radio" id="${inputId}" name="q${index + 1}" value="${optionIndex}">
-                        </td>`;
+                        let col = document.createElement("div");
+                        col.classList.add("col");
+                        col.innerHTML = `
+                            <label for="${inputId}" class="option-label d-flex flex-column align-items-center gap-1 p-2 rounded cursor-pointer">
+                                <span class="small">${option}</span>
+                                <input class="form-check-input mt-0" type="radio" id="${inputId}" name="q${index + 1}" value="${optionIndex}">
+                            </label>
+                        `;
+                        optionsRow.appendChild(col);
                     });
-                    bodyRow += '</tr></tbody>';
 
-                    table.innerHTML = headerRow + bodyRow;
-                    tableWrapper.appendChild(table);
-                    questionDiv.appendChild(tableWrapper);
+                    questionDiv.appendChild(optionsRow);
                 }
-
 
                 if (question.activities) {
-                    let activityTable = document.createElement("div");
-                    activityTable.classList.add("table-responsive");
+                    // Tabella per domande con attività (dati genuinamente tabulari)
+                    let wrapper = document.createElement("div");
+                    wrapper.classList.add("table-responsive");
 
                     let table = document.createElement("table");
-                    table.classList.add("table", "table-hover", "table-striped", "table-bordered");
+                    table.classList.add("table", "table-hover", "table-striped", "table-bordered", "align-middle", "mb-0");
 
-                    let thead = document.createElement("thead");
-                    let headers = `<thead><tr><th scope="col" style="font-weight: normal;">Attività</th>`;
-
+                    let headerHTML = `<thead class="table-light"><tr><th scope="col">Attività</th>`;
                     question.options.forEach(option => {
-                        headers += `<th scope="col" class="text-center" style="font-weight: normal;">${option}</th>`;
+                        headerHTML += `<th scope="col" class="text-center fw-normal small">${option}</th>`;
                     });
-                    headers += `</tr></thead>`;
+                    headerHTML += `</tr></thead>`;
 
-                    thead.innerHTML = headers;
-                    table.appendChild(thead);
-
-                    let tbody = document.createElement("tbody");
-
+                    let bodyHTML = '<tbody>';
                     question.activities.forEach((activity, actIndex) => {
-                        let row = `<tr><th scope="row">${activity}</th>`;
+                        bodyHTML += `<tr><th scope="row" class="fw-normal">${activity}</th>`;
                         for (let i = 1; i <= question.options.length; i++) {
                             let inputId = `q${index + 1}_${actIndex + 1}_${i}`;
-                            if(i == 6){
-                                row += `<td class="text-center align-middle" style="cursor: pointer;" onclick="document.getElementById('${inputId}').checked = true;">
-                <input class="form-check-input" type="radio" id="${inputId}" name="q${index + 1}_${actIndex + 1}" value="0">
-            </td>`;
-                            } else {
-                                row += `<td class="text-center align-middle" style="cursor: pointer;" onclick="document.getElementById('${inputId}').checked = true;">
-                <input class="form-check-input" type="radio" id="${inputId}" name="q${index + 1}_${actIndex + 1}" value="${i}">
-            </td>`;
-                            }
-
+                            let val = i === 6 ? 0 : i;
+                            bodyHTML += `<td class="text-center">
+                                <label for="${inputId}" class="d-block m-0 py-1" role="button">
+                                    <input class="form-check-input mt-0" type="radio" id="${inputId}" name="q${index + 1}_${actIndex + 1}" value="${val}">
+                                </label>
+                            </td>`;
                         }
-                        row += `</tr>`;
-                        tbody.innerHTML += row;
+                        bodyHTML += `</tr>`;
                     });
+                    bodyHTML += '</tbody>';
 
-                    table.appendChild(tbody);
-                    activityTable.appendChild(table);
-                    questionDiv.appendChild(activityTable);
+                    table.innerHTML = headerHTML + bodyHTML;
+                    wrapper.appendChild(table);
+                    questionDiv.appendChild(wrapper);
                 }
-
-
-
 
                 questionsContainer.appendChild(questionDiv);
             });
 
             const resultBox = document.getElementById("result-box");
-
-            function initializeFormData() {
-                const inputs = document.querySelectorAll('input[type="radio"]');
-                inputs.forEach(input => {
-                    if (!input.checked) {
-                        input.value = '0';
-                    }
-                });
-            }
-
-
-
 
             form.addEventListener("submit", function (event) {
                 event.preventDefault();
@@ -292,7 +247,7 @@
                 Object.keys(domainQuestions).forEach(domain => {
                     domainQuestions[domain].forEach(question => {
                         if (!formData.has(question) || formData.get(question) === "") {
-                            formData.set(question, '0'); // Corrected to set values directly for questions without responses
+                            formData.set(question, '0');
                         }
                     });
                 });
@@ -300,7 +255,7 @@
                 // Calculate initial scores and counts for answered questions
                 formData.forEach((value, key) => {
                     Object.keys(domainQuestions).forEach(domain => {
-                        if (domainQuestions[domain].includes(key)) { // Updated to check inclusion in the domain's questions list
+                        if (domainQuestions[domain].includes(key)) {
                             let intValue = parseInt(value);
                             if (intValue > 0) {
                                 domainScores[domain] += intValue;
@@ -325,50 +280,34 @@
                 // Calculate final scores using real values or averages for unanswered questions
                 formData.forEach((value, key) => {
                     Object.keys(domainQuestions).forEach(domain => {
-                        if (domainQuestions[domain].includes(key)) { // Updated to check inclusion again for final calculation
+                        if (domainQuestions[domain].includes(key)) {
                             let intValue = parseInt(value);
                             if (intValue > 0) {
                                 domainScores[domain] += intValue;
                             } else {
-                                domainScores[domain] += domainAverages[domain]; // Add the average score if no response
+                                domainScores[domain] += domainAverages[domain];
                             }
                             domainCounts[domain]++;
                         }
                     });
                 });
 
-
-                // Check if all domains are answered
-
                 if (Object.values(domainScores).every(score => score > 0)) {
-
-                    // Calculate total minimum and maximum scores dynamically
                     let minScore = 0;
                     let maxScore = 0;
 
                     Object.keys(domainQuestions).forEach(domain => {
                         domainQuestions[domain].forEach(question => {
-                            minScore += 1; // Minimum score is 1 per question
+                            minScore += 1;
                             const options = document.querySelectorAll(`input[name="${question}"]`);
-                            maxScore += Math.max(...[...options].map(o => +o.value));              // Number of options is the max score for that question
+                            maxScore += Math.max(...[...options].map(o => +o.value));
                         });
                     });
-
-                    // Calculate KCCQ Score
 
                     let sumScores = Object.values(domainScores).reduce((total, score) => total + score, 0);
                     let kccqScore = Math.round((sumScores - minScore) / (maxScore - minScore) * 100)
 
-                    // Generate result HTML
                     let resultHTML = `Il suo punteggio KCCQ è: <b>${kccqScore}</b><br>`;
-
-                    /*   
-                    // Print scores for each domain
-                    Object.keys(domainScores).forEach(domain => {
-                        let average = domainCounts[domain] > 0 ? domainScores[domain] / domainCounts[domain].toFixed(2) : 'N/A';
-                        resultHTML += `<b>${domain.replace(/_/g, ' ')} Score: ${domainScores[domain].toFixed(2)} (Average: ${average})</b><br>`;
-                    });
-                    */
 
                     resultBox.innerHTML = resultHTML;
                     resultBox.style.display = 'block';
@@ -376,50 +315,48 @@
                     resultBox.classList.remove('alert-danger');
 
                 } else {
-
                     resultBox.innerHTML = '<b>Errore</b>: è necessario che lei risponda a più domande per calcolare il suo punteggio KCCQ.';
                     resultBox.style.display = 'block';
                     resultBox.classList.remove('alert-success');
                     resultBox.classList.add('alert-danger');
-
                 }
-
             });
-
         });
-
     </script>
 </head>
 
-<body>
-    <div class="container mb-3">
-        <h1 class="mt-5">Questionario sullo scompenso cardiaco</h1>
-        <p class="lead">Le seguenti domande si riferiscono al suo scompenso cardiaco e a come esso influisce sulla sua
-            vita. Per cortesia legga e completi le seguenti domande. Non ci sono risposte giuste o sbagliate. Selezioni
-            la risposta che meglio descrive la sua situazione.</p>
-        <form id="questionnaire-form">
-            <div class="d-none d-print-block mb-3 pb-2 border-bottom">
-                <div class="row">
-                    <div class="col-auto"><strong>Data:</strong> _______________</div>
-                    <div class="col-auto"><strong>Paziente:</strong> ___________________________________</div>
+<body class="bg-body-tertiary">
+    <main class="container my-4 my-md-5">
+        <div class="bg-body p-4 p-md-5 rounded-3 shadow-sm">
+            <h1 class="mb-3">Questionario sullo scompenso cardiaco</h1>
+            <p class="lead text-body-secondary mb-4">Le seguenti domande si riferiscono al suo scompenso cardiaco e a come esso influisce sulla sua
+                vita. Per cortesia legga e completi le seguenti domande. Non ci sono risposte giuste o sbagliate. Selezioni
+                la risposta che meglio descrive la sua situazione.</p>
+            <form id="questionnaire-form">
+                <div class="d-none d-print-flex justify-content-between border-bottom pb-2 mb-4">
+                    <div><strong>Nome:</strong> ___________________________________</div>
+                    <div><strong>Data:</strong> _______________</div>
                 </div>
-            </div>
-            <div id="questions-container"></div>
-            <div id="result-box" class="alert" style="display: none;"></div>
-            <button type="submit" class="btn btn-primary">Calcola Punteggio</button>
-        </form>
-    </div>
-    <div class="container mt-4 small">
-        <h4>Riferimenti:</h4>
-        <p>Green CP, Porter CB, Bresnahan DR, Spertus JA. Development and evaluation of the Kansas City Cardiomyopathy
-            Questionnaire: a new health status measure for heart failure. J Am Coll Cardiol. 2000 Apr;35(5):1245-55.
-            doi: 10.1016/s0735-1097(00)00531-3. PMID: 10758967.</p>
-        <p>Miani D, Rozbowsky P, Gregori D, Pilotto L, Albanese MC, Fresco C, Fioretti PM. The Kansas City
-            Cardiomyopathy Questionnaire: Italian translation and validation. Ital Heart J. 2003 Sep;4(9):620-6. PMID:
-            14635380.</p>
-        <p>Tutti i diritti riservati ai rispettivi autori.</p>
-    </div>
-    
+                <div id="questions-container"></div>
+                <div id="result-box" class="alert" style="display: none;"></div>
+                <button type="submit" class="btn btn-dark btn-lg">Calcola Punteggio</button>
+            </form>
+        </div>
+    </main>
+
+    <footer class="container mb-5">
+        <div class="small text-body-secondary px-4">
+            <h6 class="fw-semibold">Riferimenti</h6>
+            <p class="mb-1">Green CP, Porter CB, Bresnahan DR, Spertus JA. Development and evaluation of the Kansas City Cardiomyopathy
+                Questionnaire: a new health status measure for heart failure. J Am Coll Cardiol. 2000 Apr;35(5):1245-55.
+                doi: 10.1016/s0735-1097(00)00531-3. PMID: 10758967.</p>
+            <p class="mb-1">Miani D, Rozbowsky P, Gregori D, Pilotto L, Albanese MC, Fresco C, Fioretti PM. The Kansas City
+                Cardiomyopathy Questionnaire: Italian translation and validation. Ital Heart J. 2003 Sep;4(9):620-6. PMID:
+                14635380.</p>
+            <p>Tutti i diritti riservati ai rispettivi autori.</p>
+        </div>
+    </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
         crossorigin="anonymous"></script>
