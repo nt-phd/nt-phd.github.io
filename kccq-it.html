@@ -8,37 +8,20 @@
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 
     <style>
-        /* Contrasto migliorato per radio buttons */
+        /* Contrasto migliorato tramite CSS custom properties di Bootstrap */
         .form-check-input {
-            border: 2px solid #333;
+            --bs-border-width: 2px;
+            --bs-border-color: var(--bs-dark);
             width: 1.25em;
             height: 1.25em;
         }
         .form-check-input:checked {
-            background-color: #000;
-            border-color: #000;
+            background-color: var(--bs-dark);
+            border-color: var(--bs-dark);
         }
         .form-check-input:focus {
-            border-color: #000;
-            box-shadow: 0 0 0 0.25rem rgba(0, 0, 0, 0.25);
-        }
-
-        /* Etichette più leggibili */
-        .form-check-label {
-            color: #111;
-            font-size: 1rem;
-        }
-
-        /* Intestazioni tabella più visibili */
-        .table thead th {
-            font-weight: 600 !important;
-            color: #111;
-            border-bottom: 2px solid #333;
-        }
-
-        /* Righe tabella con bordi più definiti */
-        .table td, .table th {
-            border-color: #999;
+            border-color: var(--bs-dark);
+            box-shadow: 0 0 0 0.25rem rgba(var(--bs-dark-rgb), 0.25);
         }
 
         /* Stili di stampa */
@@ -105,15 +88,6 @@
                 break-inside: avoid;
                 page-break-inside: avoid;
                 margin-bottom: 12pt;
-            }
-
-            /* Firma in fondo */
-            form::after {
-                content: "Data: _______________    Firma: ___________________________________";
-                display: block;
-                margin-top: 30pt;
-                font-size: 12pt;
-                color: #000;
             }
         }
     </style>
@@ -194,28 +168,31 @@
                 questionDiv.innerHTML = `<label><b>${question.label}</b></label>`;
 
                 if (!question.activities) {
+                    let tableWrapper = document.createElement("div");
+                    tableWrapper.classList.add("table-responsive");
 
-                    let optionsDiv = document.createElement("div");
-                    optionsDiv.classList.add("m-2");
+                    let table = document.createElement("table");
+                    table.classList.add("table", "table-bordered", "text-center", "align-middle", "mt-2");
 
+                    let headerRow = '<thead><tr>';
                     question.options.forEach(option => {
-                        let optionIndex = question.options.indexOf(option) + 1;
-                        let inputId = `q${index + 1}_option${optionIndex}`;
-
-
-                        let optionDiv = document.createElement("div");
-                        optionDiv.classList.add("form-check");
-                        optionDiv.style.marginLeft = "1rem";
-
-                        optionDiv.innerHTML = `
-                <input class="form-check-input" type="radio" id="${inputId}" name="q${index + 1}" value="${optionIndex}">
-                <label class="form-check-label" for="${inputId}">${option}</label>
-            `;
-
-                        optionsDiv.appendChild(optionDiv);
+                        headerRow += `<th scope="col" class="fw-normal small">${option}</th>`;
                     });
+                    headerRow += '</tr></thead>';
 
-                    questionDiv.appendChild(optionsDiv);
+                    let bodyRow = '<tbody><tr>';
+                    question.options.forEach((option, optIdx) => {
+                        let optionIndex = optIdx + 1;
+                        let inputId = `q${index + 1}_option${optionIndex}`;
+                        bodyRow += `<td class="align-middle" style="cursor:pointer" onclick="document.getElementById('${inputId}').checked = true;">
+                            <input class="form-check-input" type="radio" id="${inputId}" name="q${index + 1}" value="${optionIndex}">
+                        </td>`;
+                    });
+                    bodyRow += '</tr></tbody>';
+
+                    table.innerHTML = headerRow + bodyRow;
+                    tableWrapper.appendChild(table);
+                    questionDiv.appendChild(tableWrapper);
                 }
 
 
@@ -421,6 +398,12 @@
             vita. Per cortesia legga e completi le seguenti domande. Non ci sono risposte giuste o sbagliate. Selezioni
             la risposta che meglio descrive la sua situazione.</p>
         <form id="questionnaire-form">
+            <div class="d-none d-print-block mb-3 pb-2 border-bottom">
+                <div class="row">
+                    <div class="col-auto"><strong>Data:</strong> _______________</div>
+                    <div class="col-auto"><strong>Paziente:</strong> ___________________________________</div>
+                </div>
+            </div>
             <div id="questions-container"></div>
             <div id="result-box" class="alert" style="display: none;"></div>
             <button type="submit" class="btn btn-primary">Calcola Punteggio</button>
