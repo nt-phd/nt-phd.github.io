@@ -251,7 +251,8 @@
 
                 const nome = document.getElementById('nome').value.trim();
                 const cognome = document.getElementById('cognome').value.trim();
-                const dataNascita = document.getElementById('data_nascita').value;
+                const dataNascitaRaw = document.getElementById('data_nascita').value;
+                const dataNascita = dataNascitaRaw ? dataNascitaRaw.split('-').reverse().join('/') : '';
                 const dataEsecuzione = new Date().toLocaleDateString('it-IT');
 
                 let formData = new FormData(form);
