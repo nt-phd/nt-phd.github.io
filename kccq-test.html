@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>KCCQ Test Suite</title>
+<style>
+  body { font-family: monospace; padding: 2rem; background: #111; color: #eee; }
+  .pass { color: #4f4; }
+  .fail { color: #f44; }
+  h2 { color: #aaa; border-bottom: 1px solid #333; padding-bottom: .3rem; }
+  pre { background: #222; padding: 1rem; border-radius: .4rem; overflow-x: auto; }
+</style>
+</head>
+<body>
+<h1>KCCQ Scoring — Test Suite</h1>
+<pre id="output"></pre>
+
+<script>
+// ── Copia fedele dell'algoritmo di kccq-it.html ─────────────────────────────
+const kccqDomainItems = {
+    physical_limitation: ['q1_1','q1_2','q1_3','q1_4','q1_5','q1_6'],
+    symptom_frequency:   ['q3','q5','q7','q9'],
+    symptom_burden:      ['q4','q6','q8'],
+    quality_of_life:     ['q12','q13','q14'],
+    social_limitation:   ['q15_1','q15_2','q15_3','q15_4']
+};
+const kccqItemMax = {
+    q1_1:5, q1_2:5, q1_3:5, q1_4:5, q1_5:5, q1_6:5,
+    q3:5, q4:5, q5:7, q6:5, q7:7, q8:5, q9:5,
+    q12:5, q13:5, q14:5,
+    q15_1:5, q15_2:5, q15_3:5, q15_4:5
+};
+
+function kccqDomainScore(data, items) {
+    const scores = [];
+    for (const item of items) {
+        const val = parseInt(data[item] || '0');
+        if (val > 0) {
+            const maxVal = kccqItemMax[item];
+            scores.push(Math.min(1.0, (val - 1) / (maxVal - 1)));
+        }
+    }
+    if (scores.length === 0) return null;
+    return (scores.reduce((a, b) => a + b, 0) / scores.length) * 100;
+}
+
+function calcOSS(data) {
+    const pl  = kccqDomainScore(data, kccqDomainItems.physical_limitation);
+    const sf  = kccqDomainScore(data, kccqDomainItems.symptom_frequency);
+    const sb  = kccqDomainScore(data, kccqDomainItems.symptom_burden);
+    const qol = kccqDomainScore(data, kccqDomainItems.quality_of_life);
+    const sl  = kccqDomainScore(data, kccqDomainItems.social_limitation);
+    if ([pl, sf, sb, qol, sl].some(s => s === null)) return null;
+    const tss = (sf + sb) / 2;
+    return Math.round((pl + tss + qol + sl) / 4);
+}
+// ────────────────────────────────────────────────────────────────────────────
+
+// Helper: genera un form con tutti gli item al valore specificato (o override)
+function makeData(defaultVal, overrides = {}) {
+    const data = {};
+    for (const items of Object.values(kccqDomainItems))
+        for (const item of items)
+            data[item] = String(defaultVal);
+    return { ...data, ...overrides };
+}
+
+// ── Test cases ───────────────────────────────────────────────────────────────
+const tests = [
+
+    // ── Casi estremi ─────────────────────────────────────────────────────────
+    {
+        desc: 'Tutti al massimo → OSS = 100',
+        data: makeData(5, { q5: '7', q7: '7' }),
+        expected: 100
+    },
+    {
+        desc: 'Tutti al minimo (1) → OSS = 0',
+        data: makeData(1),
+        expected: 0
+    },
+
+    // ── Self-efficacy NON deve influire sul punteggio ─────────────────────────
+    {
+        desc: 'Self-efficacy q10=1, q11=1 con tutti gli altri al max → OSS = 100 (q10/q11 ignorati)',
+        data: { ...makeData(5, { q5: '7', q7: '7' }), q10: '1', q11: '1' },
+        expected: 100
+    },
+    {
+        desc: 'Self-efficacy q10=5, q11=5 con tutti gli altri al min → OSS = 0 (q10/q11 ignorati)',
+        data: { ...makeData(1), q10: '5', q11: '5' },
+        expected: 0
+    },
+
+    // ── Symptom Stability q2 NON deve influire sul punteggio ─────────────────
+    {
+        desc: 'q2=1 (peggiorato molto) con tutti gli altri al max → OSS = 100 (q2 ignorato)',
+        data: { ...makeData(5, { q5: '7', q7: '7' }), q2: '1' },
+        expected: 100
+    },
+
+    // ── Peso uguale per dominio ───────────────────────────────────────────────
+    {
+        desc: 'Solo PL al massimo, tutti gli altri al minimo → OSS = 25',
+        data: makeData(1, { q1_1:'5', q1_2:'5', q1_3:'5', q1_4:'5', q1_5:'5', q1_6:'5' }),
+        expected: 25
+    },
+    {
+        desc: 'Solo QoL al massimo, tutti gli altri al minimo → OSS = 25',
+        data: makeData(1, { q12:'5', q13:'5', q14:'5' }),
+        expected: 25
+    },
+    {
+        desc: 'Solo SL al massimo, tutti gli altri al minimo → OSS = 25',
+        data: makeData(1, { q15_1:'5', q15_2:'5', q15_3:'5', q15_4:'5' }),
+        expected: 25
+    },
+    {
+        desc: 'Solo Symptom (SF+SB) al massimo, tutti gli altri al minimo → OSS = 25',
+        data: makeData(1, { q3:'5', q5:'7', q7:'7', q9:'5', q4:'5', q6:'5', q8:'5' }),
+        expected: 25
+    },
+
+    // ── Scala 7 punti per q5 e q7 ────────────────────────────────────────────
+    {
+        desc: 'q5=7 (max 7-point scale) normalizza a 100%',
+        // tutti al min tranne SF al max → OSS = 25
+        data: makeData(1, { q3:'5', q5:'7', q7:'7', q9:'5', q4:'5', q6:'5', q8:'5' }),
+        expected: 25
+    },
+    {
+        desc: 'q5=4, q7=4 (scala 7) → SF = 50% = 50',
+        // PL=0, SF=50, SB=0, QoL=0, SL=0 → TSS=25, OSS=(0+25+0+0)/4=6.25≈6
+        data: makeData(1, { q3:'1', q5:'4', q7:'4', q9:'1' }),
+        expected: 6   // (0 + (50+0)/2 + 0 + 0) / 4 = 6.25 → 6
+    },
+
+    // ── "Nessun sintomo" (val=6, item_max=5) → trattato come 100% ────────────
+    {
+        desc: '"Nessun sintomo" (q4=6, q6=6, q8=6) → burden = 100%',
+        // tutti al min tranne SB al max via "nessun sintomo"
+        data: makeData(1, { q4:'6', q6:'6', q8:'6' }),
+        // PL=0, SF=0, SB=100, QoL=0, SL=0 → TSS=50, OSS=(0+50+0+0)/4=12.5→13
+        expected: 13
+    },
+
+    // ── Missing data (val=0 = "non applicabile") ─────────────────────────────
+    {
+        desc: 'PL: q1_1=0 (non applicabile), q1_2..q1_6=5 → PL=100 (imputation con media)',
+        data: makeData(5, { q5:'7', q7:'7', q1_1:'0' }),
+        expected: 100
+    },
+    {
+        desc: 'PL: tutti q1=0 → domain null → OSS = null (non calcolabile)',
+        data: makeData(1, { q1_1:'0', q1_2:'0', q1_3:'0', q1_4:'0', q1_5:'0', q1_6:'0' }),
+        expected: null
+    },
+
+    // ── Valore intermedio verificabile a mano ────────────────────────────────
+    {
+        desc: 'Tutti a metà scala (PL=3/5, SF=3/5, q5=4/7, q7=4/7, SB=3/5, QoL=3/5, SL=3/5) → OSS = 50',
+        // (3-1)/(5-1)=0.5 per scala-5; (4-1)/(7-1)=0.5 per scala-7
+        data: makeData(3, { q5:'4', q7:'4' }),
+        expected: 50
+    },
+];
+
+// ── Runner ───────────────────────────────────────────────────────────────────
+let pass = 0, fail = 0;
+const lines = [];
+
+for (const t of tests) {
+    const result = calcOSS(t.data);
+    const ok = result === t.expected;
+    if (ok) pass++; else fail++;
+    const mark = ok ? '✓ PASS' : '✗ FAIL';
+    const color = ok ? 'pass' : 'fail';
+    lines.push(`<span class="${color}">${mark}</span>  ${t.desc}`
+        + (ok ? '' : `\n       atteso: ${t.expected}  →  ottenuto: ${result}`));
+}
+
+lines.push('');
+lines.push(`Risultato: <span class="${fail === 0 ? 'pass' : 'fail'}">${pass}/${tests.length} test superati</span>`);
+document.getElementById('output').innerHTML = lines.join('\n');
+</script>
+</body>
+</html>
