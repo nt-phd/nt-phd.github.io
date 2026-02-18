@@ -257,93 +257,63 @@
 
                 let formData = new FormData(form);
 
-                let domainScores = {
-                    'physical_limitations': 0,
-                    'symptoms': 0,
-                    'self_efficacy_and_knowledge': 0,
-                    'quality_of_life': 0,
-                    'social_interference': 0
+                // ── KCCQ Overall Summary Score (algoritmo ufficiale) ──────────────────
+                // Riferimenti: Green et al. JACC 2000; Spertus et al. Circ Cardiovasc
+                // Qual Outcomes 2015 (KCCQ-12); FDA MDDT Qualification Document.
+                //
+                // OSS = media di 4 punteggi di dominio (peso uguale per dominio):
+                //   Physical Limitation · Total Symptom Score · QoL · Social Limitation
+                // Self-Efficacy (q10-q11) e Symptom Stability (q2) ESCLUSI dall'OSS.
+                //
+                // Formula per dominio: mean[(item_value − 1) / (item_max − 1)] × 100
+                //   dove item_max è il massimo della scala di scoring (non quello HTML).
+                // Missing data: item non risposti o "non applicabile" (val=0) vengono
+                //   esclusi dalla media del dominio (equivale a imputation con media).
+                // ─────────────────────────────────────────────────────────────────────
+
+                const kccqDomainItems = {
+                    physical_limitation: ['q1_1','q1_2','q1_3','q1_4','q1_5','q1_6'],
+                    symptom_frequency:   ['q3','q5','q7','q9'],
+                    symptom_burden:      ['q4','q6','q8'],
+                    quality_of_life:     ['q12','q13','q14'],
+                    social_limitation:   ['q15_1','q15_2','q15_3','q15_4']
                 };
 
-                let domainQuestions = {
-                    'physical_limitations': ['q1_1', 'q1_2', 'q1_3', 'q1_4', 'q1_5', 'q1_6'],
-                    'symptoms': ['q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'q9'],
-                    'self_efficacy_and_knowledge': ['q10', 'q11'],
-                    'quality_of_life': ['q12', 'q13', 'q14'],
-                    'social_interference': ['q15_1', 'q15_2', 'q15_3', 'q15_4']
+                // Massimo della scala di scoring per item (ufficiale KCCQ).
+                // q4, q6, q8: il 6° option HTML è "nessun sintomo" → trattato come
+                //   massimo (5), non come un 6° punto della scala.
+                // q5, q7: scala genuina a 7 punti (frequenza).
+                const kccqItemMax = {
+                    q1_1:5, q1_2:5, q1_3:5, q1_4:5, q1_5:5, q1_6:5,
+                    q3:5, q4:5, q5:7, q6:5, q7:7, q8:5, q9:5,
+                    q12:5, q13:5, q14:5,
+                    q15_1:5, q15_2:5, q15_3:5, q15_4:5
                 };
 
-                let domainCounts = {
-                    'physical_limitations': 0,
-                    'symptoms': 0,
-                    'self_efficacy_and_knowledge': 0,
-                    'quality_of_life': 0,
-                    'social_interference': 0
-                };
-
-                // Assign default values for unanswered questions
-                Object.keys(domainQuestions).forEach(domain => {
-                    domainQuestions[domain].forEach(question => {
-                        if (!formData.has(question) || formData.get(question) === "") {
-                            formData.set(question, '0');
+                // Punteggio 0-100 per un dominio (media degli item risposti).
+                function kccqDomainScore(data, items) {
+                    const scores = [];
+                    for (const item of items) {
+                        const val = parseInt(data.get(item) || '0');
+                        if (val > 0) {
+                            const maxVal = kccqItemMax[item];
+                            // Math.min gestisce "nessun sintomo" (val > maxVal → 100%)
+                            scores.push(Math.min(1.0, (val - 1) / (maxVal - 1)));
                         }
-                    });
-                });
+                    }
+                    if (scores.length === 0) return null;
+                    return (scores.reduce((a, b) => a + b, 0) / scores.length) * 100;
+                }
 
-                // Calculate initial scores and counts for answered questions
-                formData.forEach((value, key) => {
-                    Object.keys(domainQuestions).forEach(domain => {
-                        if (domainQuestions[domain].includes(key)) {
-                            let intValue = parseInt(value);
-                            if (intValue > 0) {
-                                domainScores[domain] += intValue;
-                                domainCounts[domain]++;
-                            }
-                        }
-                    });
-                });
+                const kccqPL  = kccqDomainScore(formData, kccqDomainItems.physical_limitation);
+                const kccqSF  = kccqDomainScore(formData, kccqDomainItems.symptom_frequency);
+                const kccqSB  = kccqDomainScore(formData, kccqDomainItems.symptom_burden);
+                const kccqQoL = kccqDomainScore(formData, kccqDomainItems.quality_of_life);
+                const kccqSL  = kccqDomainScore(formData, kccqDomainItems.social_limitation);
 
-                // Calculate averages for each domain
-                let domainAverages = {};
-                Object.keys(domainScores).forEach(domain => {
-                    domainAverages[domain] = domainCounts[domain] > 0 ? domainScores[domain] / domainCounts[domain] : 0;
-                });
-
-                // Reset scores and counts for the final calculation
-                Object.keys(domainScores).forEach(domain => {
-                    domainScores[domain] = 0;
-                    domainCounts[domain] = 0;
-                });
-
-                // Calculate final scores using real values or averages for unanswered questions
-                formData.forEach((value, key) => {
-                    Object.keys(domainQuestions).forEach(domain => {
-                        if (domainQuestions[domain].includes(key)) {
-                            let intValue = parseInt(value);
-                            if (intValue > 0) {
-                                domainScores[domain] += intValue;
-                            } else {
-                                domainScores[domain] += domainAverages[domain];
-                            }
-                            domainCounts[domain]++;
-                        }
-                    });
-                });
-
-                if (Object.values(domainScores).every(score => score > 0)) {
-                    let minScore = 0;
-                    let maxScore = 0;
-
-                    Object.keys(domainQuestions).forEach(domain => {
-                        domainQuestions[domain].forEach(question => {
-                            minScore += 1;
-                            const options = document.querySelectorAll(`input[name="${question}"]`);
-                            maxScore += Math.max(...[...options].map(o => +o.value));
-                        });
-                    });
-
-                    let sumScores = Object.values(domainScores).reduce((total, score) => total + score, 0);
-                    let kccqScore = Math.round((sumScores - minScore) / (maxScore - minScore) * 100);
+                if ([kccqPL, kccqSF, kccqSB, kccqQoL, kccqSL].every(s => s !== null)) {
+                    const totalSymptomScore = (kccqSF + kccqSB) / 2;
+                    const kccqScore = Math.round((kccqPL + totalSymptomScore + kccqQoL + kccqSL) / 4);
 
                     const nameDisplay = (nome && cognome) ? ` di <b>${nome} ${cognome}</b>` : '';
                     resultBox.innerHTML = `Punteggio KCCQ${nameDisplay} (${dataEsecuzione}): <b>${kccqScore}/100</b>`;
