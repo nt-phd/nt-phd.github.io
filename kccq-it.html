@@ -80,6 +80,9 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // ⚙️ Incolla qui l'URL del tuo Google Apps Script Web App dopo averlo deployato
+            const APPS_SCRIPT_URL = 'INSERISCI_QUI_URL_APPS_SCRIPT';
+
             const questions = [
                 {
                     label: "1. Lo scompenso cardiaco influisce su persone diverse in modo diverso. Alcuni hanno difficoltà a respirare mentre altri si sentono stanchi. Per cortesia indichi quanto lo scompenso cardiaco (difficoltà a respirare o stanchezza) ha limitato la sua capacità di fare le seguenti attività nelle ultime 2 settimane.",
@@ -217,6 +220,12 @@
 
             form.addEventListener("submit", function (event) {
                 event.preventDefault();
+
+                const nome = document.getElementById('nome').value.trim();
+                const cognome = document.getElementById('cognome').value.trim();
+                const dataNascita = document.getElementById('data_nascita').value;
+                const dataEsecuzione = new Date().toLocaleDateString('it-IT');
+
                 let formData = new FormData(form);
 
                 let domainScores = {
@@ -305,14 +314,34 @@
                     });
 
                     let sumScores = Object.values(domainScores).reduce((total, score) => total + score, 0);
-                    let kccqScore = Math.round((sumScores - minScore) / (maxScore - minScore) * 100)
+                    let kccqScore = Math.round((sumScores - minScore) / (maxScore - minScore) * 100);
 
-                    let resultHTML = `Il suo punteggio KCCQ è: <b>${kccqScore}</b><br>`;
+                    let resultHTML = `Punteggio KCCQ di <b>${nome} ${cognome}</b> (${dataEsecuzione}): <b>${kccqScore}/100</b>`;
 
                     resultBox.innerHTML = resultHTML;
                     resultBox.style.display = 'block';
                     resultBox.classList.add('alert-success');
                     resultBox.classList.remove('alert-danger');
+
+                    // Popola i campi stampa
+                    document.getElementById('print-nome').textContent = `${nome} ${cognome}`;
+                    document.getElementById('print-data').textContent = dataEsecuzione;
+
+                    // Invio dati a Google Sheets
+                    if (APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'INSERISCI_QUI_URL_APPS_SCRIPT') {
+                        fetch(APPS_SCRIPT_URL, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                nome,
+                                cognome,
+                                dataNascita,
+                                dataEsecuzione,
+                                punteggioKCCQ: kccqScore
+                            })
+                        }).catch(err => console.error('Errore invio dati:', err));
+                    }
 
                 } else {
                     resultBox.innerHTML = '<b>Errore</b>: è necessario che lei risponda a più domande per calcolare il suo punteggio KCCQ.';
@@ -333,9 +362,27 @@
                 vita. Per cortesia legga e completi le seguenti domande. Non ci sono risposte giuste o sbagliate. Selezioni
                 la risposta che meglio descrive la sua situazione.</p>
             <form id="questionnaire-form">
+                <div class="mb-4 pb-3 border-bottom">
+                    <p class="fw-semibold mb-3">Dati del paziente</p>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="nome" class="form-label">Nome <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="nome" name="nome" required placeholder="Mario">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="cognome" class="form-label">Cognome <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="cognome" name="cognome" required placeholder="Rossi">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="data_nascita" class="form-label">Data di nascita <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="data_nascita" name="data_nascita" required>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="d-none d-print-flex justify-content-between border-bottom pb-2 mb-4">
-                    <div><strong>Nome:</strong> ___________________________________</div>
-                    <div><strong>Data:</strong> _______________</div>
+                    <div><strong>Nome:</strong> <span id="print-nome"></span></div>
+                    <div><strong>Data:</strong> <span id="print-data"></span></div>
                 </div>
                 <div id="questions-container"></div>
                 <div id="result-box" class="alert" style="display: none;"></div>
