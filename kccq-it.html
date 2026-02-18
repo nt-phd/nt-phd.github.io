@@ -7,6 +7,7 @@
     <title>KCCQ - Questionario sullo scompenso cardiaco</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=initRecaptcha" async defer></script>
 
     <style>
         /* Radio button — alto contrasto tramite variabili Bootstrap */
@@ -79,9 +80,36 @@
     </style>
 
     <script>
+        // ⚙️ Configurazione — modifica questi due valori
+        const APPS_SCRIPT_URL = 'https://script.google.com/a/macros/ospedaliriuniti.marche.it/s/AKfycbxDJEyl1779EJgADJC-GoEsTUHyXyYEVrIXVO919qYty1mZl1pay6XjfYS0pwksSQ/exec';
+        const RECAPTCHA_SITE_KEY = '6Lcsp28sAAAAAGia-FK1TN3sOzAqZdXoZSBYoGpX';
+
+        // reCAPTCHA — variabili di stato
+        let recaptchaWidgetId;
+        let pendingSubmission = null;
+
+        function initRecaptcha() {
+            if (RECAPTCHA_SITE_KEY === 'INSERISCI_QUI_SITE_KEY_RECAPTCHA') return;
+            recaptchaWidgetId = grecaptcha.render('recaptcha-container', {
+                sitekey: RECAPTCHA_SITE_KEY,
+                size: 'invisible',
+                callback: onCaptchaSuccess
+            });
+        }
+
+        function onCaptchaSuccess(token) {
+            if (!pendingSubmission) return;
+            fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...pendingSubmission, recaptchaToken: token })
+            }).catch(err => console.error('Errore invio dati:', err));
+            pendingSubmission = null;
+            grecaptcha.reset(recaptchaWidgetId);
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
-            // ⚙️ Incolla qui l'URL del tuo Google Apps Script Web App dopo averlo deployato
-            const APPS_SCRIPT_URL = 'INSERISCI_QUI_URL_APPS_SCRIPT';
 
             const questions = [
                 {
@@ -316,31 +344,33 @@
                     let sumScores = Object.values(domainScores).reduce((total, score) => total + score, 0);
                     let kccqScore = Math.round((sumScores - minScore) / (maxScore - minScore) * 100);
 
-                    let resultHTML = `Punteggio KCCQ di <b>${nome} ${cognome}</b> (${dataEsecuzione}): <b>${kccqScore}/100</b>`;
-
-                    resultBox.innerHTML = resultHTML;
+                    const nameDisplay = (nome && cognome) ? ` di <b>${nome} ${cognome}</b>` : '';
+                    resultBox.innerHTML = `Punteggio KCCQ${nameDisplay} (${dataEsecuzione}): <b>${kccqScore}/100</b>`;
                     resultBox.style.display = 'block';
                     resultBox.classList.add('alert-success');
                     resultBox.classList.remove('alert-danger');
 
                     // Popola i campi stampa
-                    document.getElementById('print-nome').textContent = `${nome} ${cognome}`;
+                    document.getElementById('print-nome').textContent = (nome && cognome) ? `${nome} ${cognome}` : '';
                     document.getElementById('print-data').textContent = dataEsecuzione;
 
-                    // Invio dati a Google Sheets
-                    if (APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'INSERISCI_QUI_URL_APPS_SCRIPT') {
-                        fetch(APPS_SCRIPT_URL, {
-                            method: 'POST',
-                            mode: 'no-cors',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                nome,
-                                cognome,
-                                dataNascita,
-                                dataEsecuzione,
-                                punteggioKCCQ: kccqScore
-                            })
-                        }).catch(err => console.error('Errore invio dati:', err));
+                    // Invio dati a Google Sheets solo se tutti i dati paziente sono compilati
+                    const tuttiIDatiCompilati = nome && cognome && dataNascita;
+                    if (tuttiIDatiCompilati && APPS_SCRIPT_URL !== 'INSERISCI_QUI_URL_APPS_SCRIPT') {
+                        const dati = { nome, cognome, dataNascita, dataEsecuzione, punteggioKCCQ: kccqScore };
+                        if (recaptchaWidgetId !== undefined) {
+                            // Invio tramite reCAPTCHA invisibile
+                            pendingSubmission = dati;
+                            grecaptcha.execute(recaptchaWidgetId);
+                        } else {
+                            // reCAPTCHA non configurato — invio diretto
+                            fetch(APPS_SCRIPT_URL, {
+                                method: 'POST',
+                                mode: 'no-cors',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(dati)
+                            }).catch(err => console.error('Errore invio dati:', err));
+                        }
                     }
 
                 } else {
@@ -366,18 +396,19 @@
                     <p class="fw-semibold mb-3">Dati del paziente</p>
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label for="nome" class="form-label">Nome <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="nome" name="nome" required placeholder="Mario">
+                            <label for="nome" class="form-label">Nome</label>
+                            <input type="text" class="form-control" id="nome" name="nome" autocomplete="off">
                         </div>
                         <div class="col-md-4">
-                            <label for="cognome" class="form-label">Cognome <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="cognome" name="cognome" required placeholder="Rossi">
+                            <label for="cognome" class="form-label">Cognome</label>
+                            <input type="text" class="form-control" id="cognome" name="cognome" autocomplete="off">
                         </div>
                         <div class="col-md-4">
-                            <label for="data_nascita" class="form-label">Data di nascita <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" id="data_nascita" name="data_nascita" required>
+                            <label for="data_nascita" class="form-label">Data di nascita</label>
+                            <input type="date" class="form-control" id="data_nascita" name="data_nascita">
                         </div>
                     </div>
+                    <p class="text-body-secondary small mt-2 mb-0">Se compilati, nome, cognome e data di nascita permettono il salvataggio automatico del punteggio nel database.</p>
                 </div>
 
                 <div class="d-none d-print-flex justify-content-between border-bottom pb-2 mb-4">
@@ -386,6 +417,7 @@
                 </div>
                 <div id="questions-container"></div>
                 <div id="result-box" class="alert" style="display: none;"></div>
+                <div id="recaptcha-container"></div>
                 <button type="submit" class="btn btn-dark btn-lg">Calcola Punteggio</button>
             </form>
         </div>
