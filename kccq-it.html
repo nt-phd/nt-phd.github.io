@@ -111,6 +111,11 @@
 
         document.addEventListener("DOMContentLoaded", function () {
 
+            // Evita che il browser ripristini i valori del form tra le sessioni
+            document.getElementById('nome').value = '';
+            document.getElementById('cognome').value = '';
+            document.getElementById('data_nascita').value = '';
+
             const questions = [
                 {
                     label: "1. Lo scompenso cardiaco influisce su persone diverse in modo diverso. Alcuni hanno difficoltà a respirare mentre altri si sentono stanchi. Per cortesia indichi quanto lo scompenso cardiaco (difficoltà a respirare o stanchezza) ha limitato la sua capacità di fare le seguenti attività nelle ultime 2 settimane.",
@@ -376,7 +381,7 @@
                         </div>
                         <div class="col-md-4">
                             <label for="data_nascita" class="form-label">Data di nascita</label>
-                            <input type="date" class="form-control" id="data_nascita" name="data_nascita">
+                            <input type="date" class="form-control" id="data_nascita" name="data_nascita" autocomplete="off">
                         </div>
                     </div>
                 </div>
