@@ -115,6 +115,7 @@
             document.getElementById('nome').value = '';
             document.getElementById('cognome').value = '';
             document.getElementById('data_nascita').value = '';
+            document.getElementById('sei_minuti').value = '';
 
             const questions = [
                 {
@@ -259,6 +260,8 @@
                 const dataNascitaRaw = document.getElementById('data_nascita').value;
                 const dataNascita = dataNascitaRaw ? dataNascitaRaw.split('-').reverse().join('/') : '';
                 const dataEsecuzione = new Date().toLocaleDateString('it-IT');
+                const seiMinutiRaw = document.getElementById('sei_minuti').value.trim();
+                const seiMinuti = seiMinutiRaw !== '' ? parseInt(seiMinutiRaw) : null;
 
                 let formData = new FormData(form);
 
@@ -321,7 +324,8 @@
                     const kccqScore = Math.round((kccqPL + totalSymptomScore + kccqQoL + kccqSL) / 4);
 
                     const nameDisplay = (nome && cognome) ? ` di <b>${nome} ${cognome}</b>` : '';
-                    resultBox.innerHTML = `Punteggio KCCQ${nameDisplay} (${dataEsecuzione}): <b>${kccqScore}/100</b>`;
+                    const seiMinutiDisplay = seiMinuti !== null ? ` &nbsp;·&nbsp; 6MWT: <b>${seiMinuti} m</b>` : '';
+                    resultBox.innerHTML = `Punteggio KCCQ${nameDisplay} (${dataEsecuzione}): <b>${kccqScore}/100</b>${seiMinutiDisplay}`;
                     resultBox.style.display = 'block';
                     resultBox.classList.add('alert-success');
                     resultBox.classList.remove('alert-danger');
@@ -333,7 +337,7 @@
                     // Invio dati a Google Sheets solo se tutti i dati paziente sono compilati
                     const tuttiIDatiCompilati = nome && cognome && dataNascita;
                     if (tuttiIDatiCompilati && APPS_SCRIPT_URL !== 'INSERISCI_QUI_URL_APPS_SCRIPT') {
-                        const dati = { nome, cognome, dataNascita, dataEsecuzione, punteggioKCCQ: kccqScore };
+                        const dati = { nome, cognome, dataNascita, dataEsecuzione, punteggioKCCQ: kccqScore, seiMinutiTest: seiMinuti ?? '' };
                         if (recaptchaWidgetId !== undefined) {
                             // Invio tramite reCAPTCHA invisibile
                             pendingSubmission = dati;
@@ -382,6 +386,13 @@
                         <div class="col-md-4">
                             <label for="data_nascita" class="form-label">Data di nascita</label>
                             <input type="date" class="form-control" id="data_nascita" name="data_nascita" autocomplete="off">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="sei_minuti" class="form-label">Test del cammino dei 6 minuti <span class="text-body-secondary fw-normal">(facoltativo)</span></label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="sei_minuti" name="sei_minuti" min="0" max="2000" placeholder="es. 420" autocomplete="off">
+                                <span class="input-group-text">m</span>
+                            </div>
                         </div>
                     </div>
                 </div>
